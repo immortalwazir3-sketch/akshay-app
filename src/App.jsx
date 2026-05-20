@@ -26,6 +26,8 @@ import {
   Center,
   Image,
   VisuallyHidden,
+  useColorMode,
+  useColorModeValue,
 } from "@chakra-ui/react";
 import {
   Settings,
@@ -44,9 +46,11 @@ import {
   X,
   Sparkles,
   Info,
+  Moon,
+  Sun,
 } from "lucide-react";
+import { wrap } from "regenerator-runtime";
 
-// Core Application Configurations
 // Core Application Configurations
 const TAGS = ["Work", "Health", "Money", "Love", "Mind", "Other"];
 
@@ -126,6 +130,135 @@ const STRINGS = {
 };
 
 export default function App() {
+  const { colorMode, toggleColorMode } = useColorMode();
+
+  // ═══ THEME TOKENS (Safely placed at the top level of the component) ═══
+  const bgBase = useColorModeValue("#F7F9FC", "#08090A");
+  const bgGrad = useColorModeValue(
+    "radial-gradient(circle at 50% -20%, rgba(0, 2w, 153, 0.08), transparent 75%)",
+    "radial-gradient(circle at 50% -20%, rgba(0, 230, 153, 0.05), transparent 75%)",
+  );
+  const textPrimary = useColorModeValue("#1A202C", "#EDE8E0");
+  const textSecondary = useColorModeValue("blackAlpha.600", "whiteAlpha.400");
+  const textTertiary = useColorModeValue("blackAlpha.400", "whiteAlpha.300");
+  const cardBg = useColorModeValue("white", "rgba(255, 255, 255, 0.01)");
+  const cardBgHover = useColorModeValue("gray.50", "rgba(255, 255, 255, 0.03)");
+  const cardBgSolid = useColorModeValue("white", "rgba(255, 255, 255, 0.02)");
+  const borderColor = useColorModeValue(
+    "blackAlpha.100",
+    "rgba(255, 255, 255, 0.05)",
+  );
+  const borderColorHover = useColorModeValue(
+    "blackAlpha.300",
+    "rgba(255, 255, 255, 0.15)",
+  );
+  const accentBase = useColorModeValue("#00B377", "#00E699");
+  const accentGrad = useColorModeValue(
+    "linear(to-br, #00B377, #008055)",
+    "linear(to-br, #00E699, #00B377)",
+  );
+  const accentGradHover = useColorModeValue(
+    "linear(to-br, #008055, #00B377)",
+    "linear(to-br, #00B377, #00E699)",
+  );
+  const accentBg = useColorModeValue(
+    "rgba(0, 230, 153, 0.15)",
+    "rgba(0, 230, 153, 0.05)",
+  );
+  const accentBorder = useColorModeValue(
+    "rgba(0, 230, 153, 0.4)",
+    "rgba(0, 230, 153, 0.15)",
+  );
+  const glassBg = useColorModeValue(
+    "rgba(247, 249, 252, 0.85)",
+    "rgba(8, 9, 10, 0.85)",
+  );
+  const invertText = useColorModeValue("white", "#08090A");
+
+  // Danger Tokens
+  const dangerBg = useColorModeValue(
+    "rgba(229, 62, 62, 0.05)",
+    "rgba(229, 62, 62, 0.01)",
+  );
+  const dangerBorder = useColorModeValue(
+    "rgba(229, 62, 62, 0.2)",
+    "rgba(229, 62, 62, 0.12)",
+  );
+  const dangerHover = useColorModeValue(
+    "rgba(229, 62, 62, 0.1)",
+    "rgba(229, 62, 62, 0.03)",
+  );
+
+  // Extracted Component Specific Colors (No inline hooks allowed below)
+  const cellEmptyBg = useColorModeValue(
+    "rgba(0,0,0,0.02)",
+    "rgba(255,255,255,0.02)",
+  );
+  const cellEmptyBorder = useColorModeValue(
+    "rgba(0,0,0,0.05)",
+    "rgba(255,255,255,0.03)",
+  );
+  const lvl1Bg = useColorModeValue(
+    "rgba(0, 230, 153, 0.1)",
+    "rgba(0, 230, 153, 0.06)",
+  );
+  const lvl1Border = useColorModeValue(
+    "rgba(0, 230, 153, 0.3)",
+    "rgba(0, 230, 153, 0.2)",
+  );
+  const lvl2Bg = useColorModeValue(
+    "rgba(0, 230, 153, 0.25)",
+    "rgba(0, 230, 153, 0.15)",
+  );
+  const lvl2Border = useColorModeValue(
+    "rgba(0, 230, 153, 0.5)",
+    "rgba(0, 230, 153, 0.4)",
+  );
+  const lvl3Bg = useColorModeValue(
+    "rgba(0, 230, 153, 0.5)",
+    "rgba(0, 230, 153, 0.4)",
+  );
+  const lvl3Border = useColorModeValue(
+    "rgba(0, 230, 153, 0.6)",
+    "rgba(0, 230, 153, 0.5)",
+  );
+  const antiSpiralBg = useColorModeValue(
+    "linear(to-r, rgba(147, 51, 234, 0.08), rgba(59, 130, 246, 0.08))",
+    "linear(to-r, rgba(147, 51, 234, 0.06), rgba(59, 130, 246, 0.06))",
+  );
+  const antiSpiralBorder = useColorModeValue(
+    "rgba(147, 51, 234, 0.15)",
+    "rgba(147, 51, 234, 0.1)",
+  );
+  const antiSpiralText = useColorModeValue("purple.600", "purple.300");
+  const calNavBg = useColorModeValue("blackAlpha.50", "rgba(12, 12, 16, 0.4)");
+  const calNavBgHover = useColorModeValue(
+    "blackAlpha.100",
+    "rgba(12, 12, 16, 0.6)",
+  );
+  const backBtnHover = useColorModeValue("#008055", "#00B377");
+  const tagUnselectedBg = useColorModeValue(
+    "blackAlpha.50",
+    "rgba(12, 12, 16, 0.4)",
+  );
+  const modalOverlayBg = useColorModeValue("whiteAlpha.600", "blackAlpha.600");
+  const modalContentGlassBg = useColorModeValue(
+    "rgba(255, 255, 255, 0.9)",
+    "rgba(255, 255, 255, 0.01)",
+  );
+  const spiralEvidenceBg = useColorModeValue(
+    "linear(to-b, rgba(147, 51, 234, 0.08), transparent)",
+    "linear(to-b, rgba(147, 51, 234, 0.06), transparent)",
+  );
+  const spiralEvidenceBorder = useColorModeValue(
+    "rgba(147, 51, 234, 0.2)",
+    "rgba(147, 51, 234, 0.15)",
+  );
+  const quoteMarkColor = useColorModeValue(
+    "rgba(0,0,0,0.03)",
+    "rgba(0, 230, 153, 0.05)",
+  );
+
   // --- Core State Machine ---
   const [wins, setWins] = useState(() =>
     JSON.parse(localStorage.getItem("vj4") || "[]"),
@@ -153,7 +286,6 @@ export default function App() {
   const [isEditableMode, setIsEditableMode] = useState(false);
   const [speechEngineMode, setSpeechEngineMode] = useState("Checking…");
   const [speechError, setSpeechError] = useState("");
-  const [toastMessage, setToastMessage] = useState("");
   const [showShareNudge, setShowShareNudge] = useState(false);
 
   // --- Active Calendars & Active Target Dynamic References ---
@@ -203,10 +335,8 @@ export default function App() {
 
   const chakraToast = useToast();
 
-  // Local API Key Validator Utility
   const lookupString = (key) => STRINGS.en[key] || key;
 
-  // Micro Haptic Pulse Trigger Engine
   const triggerHapticFeedback = (duration = 40) => {
     try {
       if (navigator.vibrate) navigator.vibrate(duration);
@@ -215,7 +345,6 @@ export default function App() {
     }
   };
 
-  // Toast System Component Displayer
   const displayToast = (message) => {
     chakraToast({
       title: message,
@@ -227,7 +356,6 @@ export default function App() {
     });
   };
 
-  // --- Core Lifecycle Hooks ---
   useEffect(() => {
     localStorage.setItem("vj4", JSON.stringify(wins));
   }, [wins]);
@@ -240,7 +368,6 @@ export default function App() {
     localStorage.setItem("vj_lang", lang);
   }, [lang]);
 
-  // Manifest PWA Execution Strategy
   useEffect(() => {
     const webAppManifestData = {
       name: "Victory Journal",
@@ -248,14 +375,14 @@ export default function App() {
       description: "Your personal proof library",
       start_url: ".",
       display: "standalone",
-      background_color: "#08090A",
-      theme_color: "#08090A",
+      background_color: colorMode === "dark" ? "#08090A" : "#F7F9FC",
+      theme_color: colorMode === "dark" ? "#08090A" : "#F7F9FC",
       icons: [
         {
           src:
             "data:image/svg+xml," +
             encodeURIComponent(
-              `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192"><rect width="192" height="192" rx="36" fill="#08090A"/><text x="96" y="130" font-size="110" text-anchor="middle" fill="#00E699" font-family="serif" font-style="italic">✦</text></svg>`,
+              `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192"><rect width="192" height="192" rx="36" fill="${colorMode === "dark" ? "#08090A" : "#F7F9FC"}"/><text x="96" y="130" font-size="110" text-anchor="middle" fill="#00E699" font-family="serif" font-style="italic">✦</text></svg>`,
             ),
           sizes: "192x192",
           type: "image/svg+xml",
@@ -268,12 +395,9 @@ export default function App() {
       });
       document.getElementById("ml").href =
         URL.createObjectURL(manifestFileBlob);
-    } catch (e) {
-      /* Non-blocking dynamic manifest architecture setup failure */
-    }
-  }, []);
+    } catch (e) {}
+  }, [colorMode]);
 
-  // Speech engine support and server-side transcription probe
   useEffect(() => {
     setSpeechEngineMode(
       browserSupportsSpeechRecognition ? "Speech API" : "Basic mode",
@@ -304,7 +428,6 @@ export default function App() {
     }
   }, [transcript, listening, browserSupportsSpeechRecognition]);
 
-  // Resurface Check Engine Controller Lifecycle
   useEffect(() => {
     if (meta.onboarded) {
       const currentCalendarDayString = new Date().toDateString();
@@ -322,7 +445,6 @@ export default function App() {
     }
   }, []);
 
-  // --- Business Logic Calculations Engine ---
   const calculateStatisticalDashboardData = () => {
     const historicalLookbackLimit = new Date();
     historicalLookbackLimit.setDate(historicalLookbackLimit.getDate() - 7);
@@ -362,7 +484,6 @@ export default function App() {
 
   const appDashboardStatistics = calculateStatisticalDashboardData();
 
-  // --- Navigation & Flow Interface Handlers ---
   const executeScreenTransitionPipeline = (targetScreenName) => {
     setSearchQuery("");
     setFilterTag(null);
@@ -392,7 +513,6 @@ export default function App() {
     setScreen("home");
   };
 
-  // --- Core Speech Analytics Engine Controllers ---
   const executeUnifiedVoiceInputToggle = () => {
     isRecording ? terminateVoiceRecordingCycle() : initialVoiceRecordingCycle();
   };
@@ -474,9 +594,7 @@ export default function App() {
     if (browserSupportsSpeechRecognition && listening) {
       try {
         SpeechRecognition.stopListening();
-      } catch (e) {
-        /* Fail-safe stop */
-      }
+      } catch (e) {}
       if (liveText.trim()) {
         setIsEditableMode(true);
       }
@@ -545,7 +663,9 @@ export default function App() {
       });
 
       displayToast(
-        `Sending ${Math.round(localizedAudioPayloadBlob.size / 1024)}kb to Deepgram…`,
+        `Sending ${Math.round(
+          localizedAudioPayloadBlob.size / 1024,
+        )}kb to server…`,
       );
 
       const networkRequestStream = await fetch("/api/transcribe", {
@@ -566,7 +686,7 @@ export default function App() {
           .catch(() => ({}));
         throw new Error(
           networkRequestStream.status === 401
-            ? "Invalid API key — check Vercel environment variables"
+            ? "Invalid API key — check server setup"
             : networkRequestStream.status === 413
               ? "Recording too long — try a shorter clip"
               : structuralErrorPayload.error?.message ||
@@ -616,9 +736,7 @@ export default function App() {
     ) {
       try {
         mediaRecorderRef.current.stop();
-      } catch (e) {
-        /* Fail-safe */
-      }
+      } catch (e) {}
     }
     if (recordingStreamSourceRef.current) {
       recordingStreamSourceRef.current
@@ -634,9 +752,7 @@ export default function App() {
       if (browserSupportsSpeechRecognition) {
         SpeechRecognition.stopListening();
       }
-    } catch (e) {
-      /* Isolation catch */
-    }
+    } catch (e) {}
   };
 
   const persistCurrentVictoryToStorage = () => {
@@ -664,7 +780,6 @@ export default function App() {
     }, 400);
   };
 
-  // --- Dynamic Reminders Data Mechanics ---
   const toggleVictorySmartResurfacing = () => {
     if (!selectedWinId) return;
     const modifiedWinsList = [...wins];
@@ -707,7 +822,6 @@ export default function App() {
     displayToast("All victories cleared");
   };
 
-  // --- Core Application Custom State Screen Routers ---
   const routeToSpecificScreen = (
     victoryIdentifier,
     operationalSourceScreen,
@@ -776,7 +890,6 @@ export default function App() {
     }, 50);
   };
 
-  // --- HTML5 Rendering Engine Generation Modules ---
   const designSocialSharePosterGraph = (targetVictoryInstance) => {
     const rawDesignCanvas = nativeCanvasRef.current;
     if (!rawDesignCanvas) return;
@@ -786,7 +899,12 @@ export default function App() {
     rawDesignCanvas.width = squareResolutionBounds;
     rawDesignCanvas.height = squareResolutionBounds;
 
-    renderingContext2D.fillStyle = "#08090A";
+    const canvasBgColor = colorMode === "dark" ? "#08090A" : "#F7F9FC";
+    const canvasTextColor = colorMode === "dark" ? "#EDE8E0" : "#1A202C";
+    const canvasAccent =
+      colorMode === "dark" ? "rgba(0,230,153,0.5)" : "rgba(0,179,119,0.7)";
+
+    renderingContext2D.fillStyle = canvasBgColor;
     renderingContext2D.fillRect(
       0,
       0,
@@ -802,7 +920,11 @@ export default function App() {
       squareResolutionBounds * 0.25,
       squareResolutionBounds * 0.7,
     );
-    computationalRadialGradient.addColorStop(0, "rgba(0,230,153,0.06)");
+
+    computationalRadialGradient.addColorStop(
+      0,
+      colorMode === "dark" ? "rgba(0,230,153,0.06)" : "rgba(0,230,153,0.1)",
+    );
     computationalRadialGradient.addColorStop(1, "transparent");
     renderingContext2D.fillStyle = computationalRadialGradient;
     renderingContext2D.fillRect(
@@ -874,7 +996,7 @@ export default function App() {
         2,
     );
     renderingContext2D.font = `italic ${variableFontMeasurementScale}px Georgia,serif`;
-    renderingContext2D.fillStyle = "#EDE8E0";
+    renderingContext2D.fillStyle = canvasTextColor;
     renderingContext2D.textAlign = "left";
 
     computedTextLinesArray.forEach((currentLineItem, textLineIndex) => {
@@ -888,7 +1010,7 @@ export default function App() {
 
     if (targetVictoryInstance.tag) {
       renderingContext2D.font = "300 22px monospace";
-      renderingContext2D.fillStyle = "rgba(0,230,153,0.5)";
+      renderingContext2D.fillStyle = canvasAccent;
       renderingContext2D.textAlign = "left";
       renderingContext2D.fillText(
         targetVictoryInstance.tag.toUpperCase(),
@@ -898,7 +1020,8 @@ export default function App() {
     }
 
     renderingContext2D.font = "300 22px monospace";
-    renderingContext2D.fillStyle = "rgba(237,232,224,0.3)";
+    renderingContext2D.fillStyle =
+      colorMode === "dark" ? "rgba(237,232,224,0.3)" : "rgba(26,32,44,0.4)";
     renderingContext2D.textAlign = "left";
     renderingContext2D.fillText(
       getExtendedLongDateRepresentation(
@@ -909,7 +1032,7 @@ export default function App() {
     );
 
     renderingContext2D.font = "300 22px monospace";
-    renderingContext2D.fillStyle = "rgba(0,230,153,0.5)";
+    renderingContext2D.fillStyle = canvasAccent;
     renderingContext2D.textAlign = "right";
     renderingContext2D.fillText(
       "VICTORY JOURNAL",
@@ -986,9 +1109,7 @@ export default function App() {
         title: "My Victory",
         text: "From my Victory Journal",
       });
-    } catch (e) {
-      /* Execution interruption guard */
-    }
+    } catch (e) {}
   };
 
   const localDeviceImageDownloadAction = () => {
@@ -1011,7 +1132,6 @@ export default function App() {
     }));
   };
 
-  // --- Native Systems Data Backups & Restorations ---
   const handleFileSystemBackupExport = () => {
     const backupStructuredModel = {
       exported: new Date().toISOString(),
@@ -1026,7 +1146,9 @@ export default function App() {
     downloadExecutionAnchor.href = URL.createObjectURL(
       simulatedDataPayloadBlob,
     );
-    downloadExecutionAnchor.download = `victory-journal-${new Date().toLocaleDateString("en-US").replace(/\//g, "-")}.json`;
+    downloadExecutionAnchor.download = `victory-journal-${new Date()
+      .toLocaleDateString("en-US")
+      .replace(/\//g, "-")}.json`;
     downloadExecutionAnchor.click();
     displayToast("Exported successfully");
   };
@@ -1082,7 +1204,6 @@ export default function App() {
     eventTargetReference.value = "";
   };
 
-  // --- Localization String Helper Engines ---
   const renderFormattedTimelineHeaderString = () => {
     const activeHourIndex = new Date().getHours();
     if (activeHourIndex < 12) return lookupString("greeting_morning");
@@ -1127,7 +1248,6 @@ export default function App() {
     });
   };
 
-  // --- Timeline Component Engine Blocks ---
   const processTimelineCalendarRenderingEngine = () => {
     const calendarYearBound = currentCalendarDate.getFullYear();
     const calendarMonthBound = currentCalendarDate.getMonth();
@@ -1167,7 +1287,7 @@ export default function App() {
           textAlign="center"
           fontSize="xs"
           fontWeight="semibold"
-          color="whiteAlpha.300"
+          color={textTertiary}
           py={2}
           textTransform="uppercase"
           letterSpacing="widest"
@@ -1203,33 +1323,33 @@ export default function App() {
         historicalMonthActivityMatrix[monthDayIteration] || 0;
 
       let bgStyleProps = {
-        bg: "rgba(255,255,255,0.02)",
-        color: "#EDE8E0",
-        border: "1px solid rgba(255,255,255,0.03)",
+        bg: cellEmptyBg,
+        color: textPrimary,
+        border: `1px solid ${cellEmptyBorder}`,
       };
       if (loggedDayVictoriesCount === 1)
         bgStyleProps = {
-          bg: "rgba(0, 230, 153, 0.06)",
-          color: "#00E699",
-          border: "1px solid rgba(0, 230, 153, 0.2)",
+          bg: lvl1Bg,
+          color: accentBase,
+          border: `1px solid ${lvl1Border}`,
         };
       if (loggedDayVictoriesCount === 2)
         bgStyleProps = {
-          bg: "rgba(0, 230, 153, 0.15)",
-          color: "#EDE8E0",
-          border: "1px solid rgba(0, 230, 153, 0.4)",
+          bg: lvl2Bg,
+          color: textPrimary,
+          border: `1px solid ${lvl2Border}`,
         };
       if (loggedDayVictoriesCount === 3)
         bgStyleProps = {
-          bg: "rgba(0, 230, 153, 0.4)",
-          color: "#08090A",
+          bg: lvl3Bg,
+          color: invertText,
           fontWeight: "bold",
-          border: "1px solid rgba(0, 230, 153, 0.5)",
+          border: `1px solid ${lvl3Border}`,
         };
       if (loggedDayVictoriesCount > 3)
         bgStyleProps = {
-          bgGradient: "linear(to-br, #00E699, #00B377)",
-          color: "#08090A",
+          bgGradient: accentGrad,
+          color: invertText,
           fontWeight: "black",
           boxShadow: "0 0 20px rgba(0, 230, 153, 0.3)",
         };
@@ -1272,7 +1392,7 @@ export default function App() {
           transition="all 0.2s cubic-bezier(0.16, 1, 0.3, 1)"
           _hover={{
             transform: "translateY(-1px)",
-            border: "1px solid rgba(0, 230, 153, 0.4)",
+            border: `1px solid ${lvl2Border}`,
           }}
           _active={{ transform: "scale(0.96)" }}
           onClick={executeTargetDayRouteAction}
@@ -1280,9 +1400,9 @@ export default function App() {
           {...(matchIsToday
             ? {
                 ring: "2",
-                ringColor: "#00E699",
+                ringColor: accentBase,
                 ringOffset: "2",
-                ringOffsetColor: "#08090A",
+                ringOffsetColor: bgBase,
               }
             : {})}
         >
@@ -1293,10 +1413,10 @@ export default function App() {
               right="-2px"
               fontSize="9px"
               px={1.5}
-              bg="#08090A"
-              color="#00E699"
+              bg={invertText}
+              color={accentBase}
               borderRadius="full"
-              border="1px solid rgba(0, 230, 153, 0.2)"
+              border={`1px solid ${lvl1Border}`}
               minW="16px"
               textAlign="center"
               variant="unset"
@@ -1319,7 +1439,6 @@ export default function App() {
     setCurrentCalendarDate(updatedTargetCalendarDate);
   };
 
-  // --- Dynamic Live Text Highlighting Filter Engine ---
   const handleQueryRegexHighlighting = (
     targetTextPhrase,
     searchKeywordToken,
@@ -1331,11 +1450,10 @@ export default function App() {
     );
     return targetTextPhrase.replace(
       extractionRegularExpression,
-      '<mark style="background:rgba(0,230,153,.2);color:#EDE8E0;border-radius:4px;padding:0 3px">$1</mark>',
+      `<mark style="background:${colorMode === "dark" ? "rgba(0,230,153,.2)" : "rgba(0,179,119,.3)"};color:${textPrimary};border-radius:4px;padding:0 3px">$1</mark>`,
     );
   };
 
-  // --- Dynamic Filtering & Text Sub-selection Precomputations ---
   const activeDashboardFilteredWins = wins
     .filter((w) => !filterTag || w.tag === filterTag)
     .slice(0, 8);
@@ -1360,13 +1478,14 @@ export default function App() {
   return (
     <Box
       minH="100vh"
-      bg="#08090A"
-      bgGradient="radial-gradient(circle at 50% -20%, rgba(0, 230, 153, 0.05), transparent 75%)"
-      color="#EDE8E0"
+      bg={bgBase}
+      bgGradient={bgGrad}
+      color={textPrimary}
       px={0}
       pb="112px"
       position="relative"
       overflowX="hidden"
+      transition="all 0.3s ease"
     >
       {/* ═══ ONBOARDING SCREEN 1 ═══ */}
       {screen === "ob1" && (
@@ -1386,13 +1505,13 @@ export default function App() {
               fontWeight="bold"
               textTransform="uppercase"
               tracking="widest"
-              color="#00E699"
-              bg="rgba(0,230,153,0.05)"
+              color={accentBase}
+              bg={accentBg}
               alignSelf="flex-start"
               px={3.5}
               py={1}
               borderRadius="full"
-              border="1px solid rgba(0,230,153,0.15)"
+              border={`1px solid ${accentBorder}`}
             >
               Victory Journal
             </Text>
@@ -1411,15 +1530,15 @@ export default function App() {
                 as="em"
                 fontStyle="italic"
                 fontWeight="normal"
-                color="#00E699"
-                bgGradient="linear(to-r, #00E699, #00B377)"
+                color={accentBase}
+                bgGradient={accentGrad}
                 bgClip="text"
               >
                 evidence.
               </Box>
             </Heading>
             <Text
-              color="whiteAlpha.700"
+              color={textSecondary}
               fontSize="md"
               lineHeight="relaxed"
               fontWeight="light"
@@ -1428,7 +1547,7 @@ export default function App() {
               <br />
               <br />
               Over time, you build{" "}
-              <strong style={{ fontWeight: 500, color: "#EDE8E0" }}>
+              <strong style={{ fontWeight: 500, color: textPrimary }}>
                 your own proof
               </strong>{" "}
               that you're capable. When doubt arrives, you read your own record
@@ -1439,12 +1558,12 @@ export default function App() {
             <Button
               w="full"
               py={7}
-              bgGradient="linear(to-r, #00E699, #00B377)"
+              bgGradient={accentGrad}
               _hover={{
-                bgGradient: "linear(to-r, #00B377, #00E699)",
+                bgGradient: accentGradHover,
                 boxShadow: "0 0 25px rgba(0,230,153,0.25)",
               }}
-              color="#08090A"
+              color={invertText}
               fontWeight="bold"
               borderRadius="2xl"
               transition="all 0.3s"
@@ -1453,7 +1572,7 @@ export default function App() {
             >
               Begin &nbsp;→
             </Button>
-            <Box fontSize="2xl" color="rgba(0,230,153,0.3)">
+            <Box fontSize="2xl" color={accentBorder}>
               <Sparkles size={20} />
             </Box>
           </VStack>
@@ -1479,13 +1598,13 @@ export default function App() {
               fontWeight="bold"
               textTransform="uppercase"
               tracking="widest"
-              color="#00E699"
-              bg="rgba(0,230,153,0.05)"
+              color={accentBase}
+              bg={accentBg}
               alignSelf="flex-start"
               px={3.5}
               py={1}
               borderRadius="full"
-              border="1px solid rgba(0,230,153,0.15)"
+              border={`1px solid ${accentBorder}`}
             >
               Victory Journal
             </Text>
@@ -1500,24 +1619,24 @@ export default function App() {
               <br />
               we call you?
             </Heading>
-            <Text color="whiteAlpha.600" fontSize="sm" fontWeight="light">
+            <Text color={textSecondary} fontSize="sm" fontWeight="light">
               Your journal knows your name.
             </Text>
             <Input
               w="full"
-              bg="rgba(255, 255, 255, 0.02)"
-              border="1px solid rgba(255, 255, 255, 0.05)"
+              bg={cardBg}
+              border={`1px solid ${borderColor}`}
               _focus={{
-                borderColor: "rgba(0, 230, 153, 0.5)",
+                borderColor: accentBorder,
                 boxShadow: "0 0 12px rgba(0, 230, 153, 0.15)",
-                bg: "rgba(255,255,255,0.04)",
+                bg: cardBgHover,
               }}
               borderRadius="2xl"
               px={5}
               py={7}
-              color="#EDE8E0"
+              color={textPrimary}
               placeholder="Your name…"
-              _placeholder={{ color: "rgba(237, 232, 224, 0.2)" }}
+              _placeholder={{ color: textTertiary }}
               outline="none"
               transition="all 0.3s"
               maxLength={32}
@@ -1534,12 +1653,12 @@ export default function App() {
             <Button
               w="full"
               py={7}
-              bgGradient="linear(to-r, #00E699, #00B377)"
+              bgGradient={accentGrad}
               _hover={{
-                bgGradient: "linear(to-r, #00B377, #00E699)",
+                bgGradient: accentGradHover,
                 boxShadow: "0 0 25px rgba(0,230,153,0.2)",
               }}
-              color="#08090A"
+              color={invertText}
               fontWeight="bold"
               borderRadius="2xl"
               transition="all 0.3s"
@@ -1551,8 +1670,8 @@ export default function App() {
             <Button
               variant="unstyled"
               fontSize="xs"
-              color="whiteAlpha.400"
-              _hover={{ color: "whiteAlpha.700" }}
+              color={textTertiary}
+              _hover={{ color: textSecondary }}
               py={2}
               textTransform="uppercase"
               tracking="widest"
@@ -1574,7 +1693,7 @@ export default function App() {
                 fontSize="10px"
                 textTransform="uppercase"
                 tracking="widest"
-                color="whiteAlpha.400"
+                color={textTertiary}
                 fontWeight="bold"
                 mb={1}
               >
@@ -1593,7 +1712,7 @@ export default function App() {
                       as="em"
                       fontStyle="italic"
                       fontWeight="normal"
-                      color="#00E699"
+                      color={accentBase}
                     >
                       {meta.name}.
                     </Box>
@@ -1605,7 +1724,7 @@ export default function App() {
                       as="em"
                       fontStyle="italic"
                       fontWeight="normal"
-                      color="#00E699"
+                      color={accentBase}
                     >
                       journal.
                     </Box>
@@ -1615,15 +1734,15 @@ export default function App() {
             </Box>
             <IconButton
               p={3}
-              bg="rgba(255, 255, 255, 0.02)"
+              bg={cardBgSolid}
               _hover={{
-                bg: "rgba(255, 255, 255, 0.04)",
-                borderColor: "rgba(0,230,153,0.2)",
+                bg: cardBgHover,
+                borderColor: accentBorder,
               }}
               borderRadius="xl"
               transition="all 0.2s"
-              border="1px solid rgba(255, 255, 255, 0.06)"
-              icon={<Settings size={18} color="#EDE8E0" />}
+              border={`1px solid ${borderColor}`}
+              icon={<Settings size={18} color={textPrimary} />}
               onClick={() => executeScreenTransitionPipeline("settings")}
             />
           </Flex>
@@ -1632,10 +1751,10 @@ export default function App() {
           <SimpleGrid
             columns={3}
             spacing={3}
-            bg="rgba(255, 255, 255, 0.01)"
+            bg={cardBg}
             borderRadius="2xl"
             p={4}
-            border="1px solid rgba(255, 255, 255, 0.05)"
+            border={`1px solid ${borderColor}`}
             mb={5}
             backdropFilter="blur(16px)"
           >
@@ -1644,7 +1763,7 @@ export default function App() {
                 fontSize="2xl"
                 fontFamily="serif"
                 fontWeight="light"
-                color="#00E699"
+                color={accentBase}
               >
                 {appDashboardStatistics.total}
               </Text>
@@ -1652,22 +1771,22 @@ export default function App() {
                 fontSize="9px"
                 textTransform="uppercase"
                 tracking="wider"
-                color="whiteAlpha.400"
+                color={textSecondary}
                 mt={1}
               >
                 {lookupString("stat_victories")}
               </Text>
             </Box>
             <Box
-              borderLeft="1px solid rgba(255, 255, 255, 0.05)"
-              borderRight="1px solid rgba(255, 255, 255, 0.05)"
+              borderLeft={`1px solid ${borderColor}`}
+              borderRight={`1px solid ${borderColor}`}
               textAlign="center"
             >
               <Text
                 fontSize="2xl"
                 fontFamily="serif"
                 fontWeight="light"
-                color="#00E699"
+                color={accentBase}
               >
                 {appDashboardStatistics.streak}
               </Text>
@@ -1675,7 +1794,7 @@ export default function App() {
                 fontSize="9px"
                 textTransform="uppercase"
                 tracking="wider"
-                color="whiteAlpha.400"
+                color={textSecondary}
                 mt={1}
               >
                 {lookupString("stat_streak")}
@@ -1686,7 +1805,7 @@ export default function App() {
                 fontSize="2xl"
                 fontFamily="serif"
                 fontWeight="light"
-                color="#00E699"
+                color={accentBase}
               >
                 {appDashboardStatistics.week}
               </Text>
@@ -1694,7 +1813,7 @@ export default function App() {
                 fontSize="9px"
                 textTransform="uppercase"
                 tracking="wider"
-                color="whiteAlpha.400"
+                color={textSecondary}
                 mt={1}
               >
                 {lookupString("stat_week")}
@@ -1708,11 +1827,11 @@ export default function App() {
                 mb={6}
                 py={2.5}
                 px={4}
-                bg="rgba(0, 230, 153, 0.05)"
-                border="1px solid rgba(0, 230, 153, 0.15)"
+                bg={accentBg}
+                border={`1px solid ${accentBorder}`}
                 borderRadius="xl"
                 fontSize="xs"
-                color="#00E699"
+                color={accentBase}
                 textAlign="center"
                 tracking="wide"
                 fontWeight="medium"
@@ -1727,11 +1846,11 @@ export default function App() {
               mb={6}
               py={3}
               px={4}
-              bg="rgba(229, 62, 62, 0.05)"
-              border="1px solid rgba(229, 62, 62, 0.12)"
+              bg={dangerBg}
+              border={`1px solid ${dangerBorder}`}
               borderRadius="xl"
               fontSize="xs"
-              color="red.300"
+              color="red.500"
               textAlign="center"
             >
               <Flex align="center" justify="center" gap={2}>
@@ -1745,9 +1864,9 @@ export default function App() {
           {hasVoiceSupport && (
             <VStack
               p={6}
-              bgGradient="linear(to-b, rgba(255, 255, 255, 0.02), transparent)"
+              bgGradient={`linear(to-b, ${cardBgSolid}, transparent)`}
               borderRadius="3xl"
-              border="1px solid rgba(255, 255, 255, 0.04)"
+              border={`1px solid ${borderColor}`}
               mb={8}
               spacing={4}
               justify="center"
@@ -1762,25 +1881,19 @@ export default function App() {
                 cursor="pointer"
                 transition="all 0.4s cubic-bezier(0.16, 1, 0.3, 1)"
                 position="relative"
-                bg={
-                  isRecording
-                    ? "rgba(229, 62, 62, 0.08)"
-                    : "rgba(0, 230, 153, 0.04)"
-                }
+                bg={isRecording ? dangerBg : accentBg}
                 border={
                   isRecording
-                    ? "1px solid rgba(229, 62, 62, 0.2)"
-                    : "1px solid rgba(0, 230, 153, 0.2)"
+                    ? `1px solid ${dangerBorder}`
+                    : `1px solid ${accentBorder}`
                 }
                 boxShadow={
                   isRecording ? "0 0 25px rgba(229, 62, 62, 0.15)" : "none"
                 }
                 transform={isRecording ? "scale(1.06)" : "none"}
                 _hover={{
-                  bg: isRecording
-                    ? "rgba(229, 62, 62, 0.1)"
-                    : "rgba(0, 230, 153, 0.08)",
-                  borderColor: isRecording ? "red.400" : "#00E699",
+                  bg: isRecording ? dangerHover : "rgba(0, 230, 153, 0.08)",
+                  borderColor: isRecording ? "red.400" : accentBase,
                 }}
                 _active={{ transform: "scale(0.94)" }}
                 onClick={executeUnifiedVoiceInputToggle}
@@ -1791,13 +1904,13 @@ export default function App() {
                   borderRadius="full"
                   align="center"
                   justify="center"
-                  bg={isRecording ? "red.500" : "#00E699"}
+                  bg={isRecording ? "red.500" : accentBase}
                   animation={isRecording ? "pulse 2s infinite" : "none"}
                 >
                   {isRecording && window.MediaRecorder ? (
-                    <Square size={18} fill="#08090A" stroke="none" />
+                    <Square size={18} fill={invertText} stroke="none" />
                   ) : (
-                    <Mic size={22} color="#08090A" />
+                    <Mic size={22} color={invertText} />
                   )}
                 </Flex>
               </Box>
@@ -1807,7 +1920,7 @@ export default function App() {
                   {isRecording ? (
                     <Text
                       as="span"
-                      color="red.400"
+                      color="red.500"
                       display="flex"
                       alignItems="center"
                       justifyContent="center"
@@ -1818,19 +1931,19 @@ export default function App() {
                         w={2}
                         h={2}
                         borderRadius="full"
-                        bg="red.400"
+                        bg="red.500"
                         animation="ping 1s cubic-bezier(0, 0, 0.2, 1) infinite"
                       />
                       {lookupString("recording")}
                     </Text>
                   ) : transcriptionStatus === "transcribing" ? (
-                    <Text as="span" color="#00E699" fontWeight="medium">
+                    <Text as="span" color={accentBase} fontWeight="medium">
                       {lookupString("transcribing")}
                     </Text>
                   ) : (
                     <Text
                       as="span"
-                      color="whiteAlpha.400"
+                      color={textTertiary}
                       fontSize="xs"
                       fontWeight="bold"
                       tracking="widest"
@@ -1845,9 +1958,9 @@ export default function App() {
                   <Badge
                     fontFamily="mono"
                     tracking="widest"
-                    color="#00E699"
-                    bg="rgba(0, 230, 153, 0.03)"
-                    border="1px solid rgba(0, 230, 153, 0.1)"
+                    color={accentBase}
+                    bg={accentBg}
+                    border={`1px solid ${accentBorder}`}
                     px={3}
                     py={0.5}
                     borderRadius="full"
@@ -1857,12 +1970,12 @@ export default function App() {
                   >
                     {speechEngineMode}
                   </Badge>
-                  <Text fontSize="10px" tracking="wide" color="whiteAlpha.400">
+                  <Text fontSize="10px" tracking="wide" color={textTertiary}>
                     Speak in any language
                   </Text>
                 </VStack>
                 {speechError && (
-                  <Text fontSize="xs" color="red.400" fontWeight="light" pt={2}>
+                  <Text fontSize="xs" color="red.500" fontWeight="light" pt={2}>
                     {speechError}
                   </Text>
                 )}
@@ -1875,16 +1988,16 @@ export default function App() {
             <Textarea
               w="full"
               h="128px"
-              bg="rgba(255, 255, 255, 0.02)"
-              border="1px solid rgba(255, 255, 255, 0.05)"
+              bg={cardBgSolid}
+              border={`1px solid ${borderColor}`}
               _focus={{
-                borderColor: "rgba(0, 230, 153, 0.3)",
+                borderColor: accentBorder,
                 boxShadow: "0 0 10px rgba(0,230,153,0.03)",
               }}
               borderRadius="2xl"
               p={4}
-              color="#EDE8E0"
-              _placeholder={{ color: "whiteAlpha.300" }}
+              color={textPrimary}
+              _placeholder={{ color: textTertiary }}
               resize="none"
               fontSize="lg"
               fontWeight="light"
@@ -1902,11 +2015,11 @@ export default function App() {
             transcriptionStatus === "transcribing") && (
             <VStack
               align="stretch"
-              bg="rgba(255, 255, 255, 0.01)"
+              bg={cardBg}
               backdropFilter="blur(10px)"
               borderRadius="2xl"
               p={5}
-              border="1px solid rgba(255, 255, 255, 0.05)"
+              border={`1px solid ${borderColor}`}
               shadow="2xl"
               spacing={4}
               mb={6}
@@ -1915,7 +2028,7 @@ export default function App() {
                 fontSize="9px"
                 textTransform="uppercase"
                 tracking="widest"
-                color="#00E699"
+                color={accentBase}
                 fontWeight="bold"
               >
                 {isRecording
@@ -1931,7 +2044,7 @@ export default function App() {
                     <Box
                       key={i}
                       flex="1"
-                      bg="rgba(0, 230, 153, 0.4)"
+                      bg={accentBorder}
                       borderRadius="full"
                       h="full"
                       animation="pulse 2s infinite"
@@ -1946,18 +2059,18 @@ export default function App() {
                   spacing={3}
                   py={2}
                   fontSize="sm"
-                  color="whiteAlpha.600"
+                  color={textSecondary}
                   fontWeight="light"
                 >
                   <Box
                     w="14px"
                     h="14px"
-                    border="2px solid #00E699"
+                    border={`2px solid ${accentBase}`}
                     borderTopColor="transparent"
                     borderRadius="full"
                     animation="spin 1s linear infinite"
                   />
-                  <Text>Transcribing with Whisper…</Text>
+                  <Text>Transcribing with AI…</Text>
                 </HStack>
               )}
 
@@ -1975,7 +2088,7 @@ export default function App() {
                   {liveText ? (
                     liveText
                   ) : (
-                    <Text as="span" color="whiteAlpha.200">
+                    <Text as="span" color={textTertiary}>
                       {lookupString("speak_ph")}
                     </Text>
                   )}
@@ -1986,8 +2099,8 @@ export default function App() {
                   minH="100px"
                   bg="transparent"
                   border="none"
-                  borderBottom="1px solid rgba(0, 230, 153, 0.15)"
-                  color="#EDE8E0"
+                  borderBottom={`1px solid ${accentBorder}`}
+                  color={textPrimary}
                   fontFamily="serif"
                   fontWeight="light"
                   fontStyle="italic"
@@ -1995,7 +2108,7 @@ export default function App() {
                   lineHeight="relaxed"
                   resize="none"
                   outline="none"
-                  _focus={{ borderColor: "rgba(0, 230, 153, 0.4)" }}
+                  _focus={{ borderColor: accentBase }}
                   pb={2}
                   p={0}
                   borderRadius="none"
@@ -2010,7 +2123,7 @@ export default function App() {
                   fontSize="9px"
                   textTransform="uppercase"
                   tracking="widest"
-                  color="whiteAlpha.300"
+                  color={textTertiary}
                   fontFamily="mono"
                 >
                   {lookupString("edit_hint")}
@@ -2024,7 +2137,7 @@ export default function App() {
             <VStack align="stretch" spacing={2} mb={6}>
               <Text
                 fontSize="xs"
-                color="whiteAlpha.400"
+                color={textSecondary}
                 fontWeight="bold"
                 textTransform="uppercase"
                 tracking="wider"
@@ -2037,7 +2150,7 @@ export default function App() {
                 spacing={2}
                 sx={{
                   "&::-webkit-scrollbar": { display: "none" },
-                  "-ms-overflow-style": "none",
+                  msOverflowStyle: "none",
                   scrollbarWidth: "none",
                 }}
               >
@@ -2053,18 +2166,14 @@ export default function App() {
                     variant="unset"
                     border="1px solid"
                     transition="all 0.2s"
-                    bg={selectedTag === tagItem ? "#00E699" : "transparent"}
-                    color={
-                      selectedTag === tagItem ? "#08090A" : "whiteAlpha.600"
-                    }
+                    bg={selectedTag === tagItem ? accentBase : "transparent"}
+                    color={selectedTag === tagItem ? invertText : textSecondary}
                     borderColor={
-                      selectedTag === tagItem
-                        ? "#00E699"
-                        : "rgba(255, 255, 255, 0.05)"
+                      selectedTag === tagItem ? accentBase : borderColor
                     }
                     _hover={{
                       borderColor:
-                        selectedTag === tagItem ? "#00E699" : "whiteAlpha.400",
+                        selectedTag === tagItem ? accentBase : borderColorHover,
                     }}
                     onClick={() =>
                       setSelectedTag(selectedTag === tagItem ? null : tagItem)
@@ -2082,13 +2191,13 @@ export default function App() {
             <SimpleGrid columns={2} spacing={3} mb={8}>
               <Button
                 py={6}
-                bg="rgba(255, 255, 255, 0.02)"
+                bg={cardBgSolid}
                 _hover={{
-                  bg: "rgba(229, 62, 62, 0.05)",
-                  color: "red.400",
-                  borderColor: "rgba(229, 62, 62, 0.15)",
+                  bg: dangerBg,
+                  color: "red.500",
+                  borderColor: dangerBorder,
                 }}
-                border="1px solid rgba(255, 255, 255, 0.05)"
+                border={`1px solid ${borderColor}`}
                 fontSize="sm"
                 fontWeight="medium"
                 borderRadius="xl"
@@ -2098,9 +2207,9 @@ export default function App() {
               </Button>
               <Button
                 py={6}
-                bgGradient="linear(to-br, #00E699, #00B377)"
-                _hover={{ bgGradient: "linear(to-br, #00B377, #00E699)" }}
-                color="#08090A"
+                bgGradient={accentGrad}
+                _hover={{ bgGradient: accentGradHover }}
+                color={invertText}
                 fontSize="sm"
                 fontWeight="bold"
                 borderRadius="xl"
@@ -2121,8 +2230,8 @@ export default function App() {
               right="24px"
               maxW="sm"
               mx="auto"
-              bgGradient="linear(to-r, #00E699, #00B377)"
-              color="#08090A"
+              bgGradient={accentGrad}
+              color={invertText}
               p={4}
               borderRadius="2xl"
               shadow="2xl"
@@ -2149,7 +2258,7 @@ export default function App() {
                 borderRadius="full"
                 bg="blackAlpha.100"
                 _hover={{ bg: "blackAlpha.200" }}
-                icon={<X size={12} color="#08090A" />}
+                icon={<X size={12} color={invertText} />}
                 onClick={(e) => {
                   e.stopPropagation();
                   setShowShareNudge(false);
@@ -2164,8 +2273,9 @@ export default function App() {
             h="auto"
             textAlign="left"
             p={5}
-            bgGradient="linear(to-r, rgba(147, 51, 234, 0.06), rgba(59, 130, 246, 0.06))"
-            border="1px solid rgba(147, 51, 234, 0.1)"
+            bgGradient={antiSpiralBg}
+            border="1px solid"
+            borderColor={antiSpiralBorder}
             borderRadius="2xl"
             _hover={{
               borderColor: "purple.400",
@@ -2181,7 +2291,7 @@ export default function App() {
               fontSize="sm"
               fontFamily="serif"
               fontStyle="italic"
-              color="purple.300"
+              color={antiSpiralText}
               fontWeight="medium"
             >
               {lookupString("spiral_btn")}
@@ -2189,7 +2299,7 @@ export default function App() {
             <Text
               fontSize="11px"
               tracking="wide"
-              color="whiteAlpha.400"
+              color={textSecondary}
               mt={1}
               fontWeight="normal"
             >
@@ -2203,18 +2313,19 @@ export default function App() {
               fontSize="xs"
               textTransform="uppercase"
               tracking="widest"
-              color="whiteAlpha.400"
+              color={textTertiary}
               fontWeight="bold"
             >
               {lookupString("recent")}
             </Text>
-            <HStack
-              spacing={2}
-              overflowX="auto"
+            <Flex
+              gap={2}
+              wrap={{ base: "nowrap", md: "wrap" }}
+              overflowX={{ base: "auto", md: "visible" }}
               pb={1}
               sx={{
                 "&::-webkit-scrollbar": { display: "none" },
-                "-ms-overflow-style": "none",
+                msOverflowStyle: "none",
                 scrollbarWidth: "none",
               }}
             >
@@ -2226,16 +2337,16 @@ export default function App() {
                 variant="unset"
                 border="1px solid"
                 transition="all"
-                bg={!filterTag ? "#EDE8E0" : "rgba(255, 255, 255, 0.02)"}
-                color={!filterTag ? "#08090A" : "whiteAlpha.500"}
-                borderColor={
-                  !filterTag ? "#EDE8E0" : "rgba(255, 255, 255, 0.05)"
-                }
+                flexShrink={0} // Prevents squeezing on mobile
+                bg={!filterTag ? textPrimary : cardBgSolid}
+                color={!filterTag ? bgBase : textSecondary}
+                borderColor={!filterTag ? textPrimary : borderColor}
                 fontWeight={!filterTag ? "bold" : "normal"}
                 onClick={() => setFilterTag(null)}
               >
                 All
               </Button>
+
               {TAGS.map((tagItem) => (
                 <Button
                   key={`filter-home-${tagItem}`}
@@ -2247,16 +2358,11 @@ export default function App() {
                   border="1px solid"
                   whiteSpace="nowrap"
                   transition="all"
-                  bg={
-                    filterTag === tagItem
-                      ? "#EDE8E0"
-                      : "rgba(255, 255, 255, 0.02)"
-                  }
-                  color={filterTag === tagItem ? "#08090A" : "whiteAlpha.500"}
+                  flexShrink={0} // Prevents squeezing on mobile
+                  bg={filterTag === tagItem ? textPrimary : cardBgSolid}
+                  color={filterTag === tagItem ? bgBase : textSecondary}
                   borderColor={
-                    filterTag === tagItem
-                      ? "#EDE8E0"
-                      : "rgba(255, 255, 255, 0.05)"
+                    filterTag === tagItem ? textPrimary : borderColor
                   }
                   fontWeight={filterTag === tagItem ? "bold" : "normal"}
                   onClick={() => setFilterTag(tagItem)}
@@ -2264,7 +2370,7 @@ export default function App() {
                   {tagItem}
                 </Button>
               ))}
-            </HStack>
+            </Flex>
 
             {/* Timeline Stack Rows Feed */}
             <VStack align="stretch" spacing={3} pt={2}>
@@ -2273,13 +2379,13 @@ export default function App() {
                   <Box
                     key={winObject.id}
                     p={4}
-                    bg="rgba(255, 255, 255, 0.01)"
+                    bg={cardBg}
                     _hover={{
-                      bg: "rgba(255, 255, 255, 0.03)",
-                      borderColor: "rgba(0, 230, 153, 0.2)",
+                      bg: cardBgHover,
+                      borderColor: accentBorder,
                     }}
                     borderRadius="2xl"
-                    border="1px solid rgba(255, 255, 255, 0.04)"
+                    border={`1px solid ${borderColor}`}
                     transition="all 0.2s"
                     cursor="pointer"
                     _active={{ transform: "scale(0.99)" }}
@@ -2290,7 +2396,7 @@ export default function App() {
                         fontSize="10px"
                         fontFamily="mono"
                         tracking="wider"
-                        color="whiteAlpha.400"
+                        color={textTertiary}
                       >
                         {getRelativeTimelineStringRepresentation(
                           winObject.date,
@@ -2300,12 +2406,12 @@ export default function App() {
                         <Badge
                           fontSize="9px"
                           fontFamily="mono"
-                          bg="rgba(0, 230, 153, 0.05)"
-                          color="#00E699"
+                          bg={accentBg}
+                          color={accentBase}
                           px={2.5}
                           py={0.5}
                           borderRadius="md"
-                          border="1px solid rgba(0, 230, 153, 0.15)"
+                          border={`1px solid ${accentBorder}`}
                           textTransform="uppercase"
                           tracking="wider"
                           variant="unset"
@@ -2316,7 +2422,7 @@ export default function App() {
                     </Flex>
                     <Text
                       fontSize="md"
-                      color="whiteAlpha.900"
+                      color={textPrimary}
                       fontWeight="light"
                       lineHeight="relaxed"
                       noOfLines={3}
@@ -2332,9 +2438,9 @@ export default function App() {
                   textAlign="center"
                   py={12}
                   fontSize="sm"
-                  color="whiteAlpha.300"
+                  color={textTertiary}
                   fontWeight="light"
-                  border="1px dashed rgba(255, 255, 255, 0.08)"
+                  border={`1px dashed ${borderColor}`}
                   borderRadius="2xl"
                 >
                   {lookupString("no_wins_home")}
@@ -2353,7 +2459,7 @@ export default function App() {
               fontSize="xs"
               textTransform="uppercase"
               tracking="widest"
-              color="whiteAlpha.400"
+              color={textTertiary}
             >
               Victory Journal
             </Text>
@@ -2369,7 +2475,7 @@ export default function App() {
                 as="em"
                 fontStyle="italic"
                 fontWeight="normal"
-                color="#00E699"
+                color={accentBase}
               >
                 win.
               </Box>
@@ -2378,24 +2484,24 @@ export default function App() {
 
           <Flex
             align="center"
-            bg="rgba(255, 255, 255, 0.02)"
+            bg={cardBgSolid}
             rounded="2xl"
-            border="1px solid rgba(255, 255, 255, 0.05)"
+            border={`1px solid ${borderColor}`}
             px={4}
             py={1}
             mb={4}
-            _focusWithin={{ borderColor: "rgba(0, 230, 153, 0.3)" }}
+            _focusWithin={{ borderColor: accentBorder }}
             transition="all 0.2s"
           >
-            <Box color="whiteAlpha.300" mr={3}>
+            <Box color={textTertiary} mr={3}>
               <Search size={18} />
             </Box>
             <Input
               w="full"
               bg="transparent"
               border="none"
-              color="#EDE8E0"
-              _placeholder={{ color: "whiteAlpha.300" }}
+              color={textPrimary}
+              _placeholder={{ color: textTertiary }}
               outline="none"
               _focus={{ boxShadow: "none" }}
               fontSize="md"
@@ -2413,8 +2519,8 @@ export default function App() {
                 size="sm"
                 variant="unstyled"
                 fontSize="lg"
-                color="whiteAlpha.400"
-                _hover={{ color: "#EDE8E0" }}
+                color={textTertiary}
+                _hover={{ color: textPrimary }}
                 ml={2}
                 icon={<X size={18} />}
                 onClick={() => setSearchQuery("")}
@@ -2422,15 +2528,16 @@ export default function App() {
             )}
           </Flex>
 
-          <HStack
-            spacing={2}
-            overflowX="auto"
+          <Flex
+            gap={2}
+            wrap={{ base: "nowrap", md: "wrap" }}
+            overflowX={{ base: "auto", md: "visible" }}
             pb={4}
             mb={4}
-            borderBottom="1px solid rgba(255, 255, 255, 0.04)"
+            borderBottom={`1px solid ${borderColor}`}
             sx={{
               "&::-webkit-scrollbar": { display: "none" },
-              "-ms-overflow-style": "none",
+              msOverflowStyle: "none",
               scrollbarWidth: "none",
             }}
           >
@@ -2442,16 +2549,16 @@ export default function App() {
               variant="unset"
               border="1px solid"
               transition="all"
-              bg={!searchFilterTag ? "#00E699" : "rgba(255, 255, 255, 0.02)"}
-              color={!searchFilterTag ? "#08090A" : "whiteAlpha.500"}
-              borderColor={
-                !searchFilterTag ? "#00E699" : "rgba(255, 255, 255, 0.05)"
-              }
+              flexShrink={0} // Prevents the button from squishing on mobile
+              bg={!searchFilterTag ? accentBase : cardBgSolid}
+              color={!searchFilterTag ? invertText : textSecondary}
+              borderColor={!searchFilterTag ? accentBase : borderColor}
               fontWeight={!searchFilterTag ? "bold" : "normal"}
               onClick={() => setSearchFilterTag(null)}
             >
               All
             </Button>
+
             {TAGS.map((tagItem) => (
               <Button
                 key={`search-tag-${tagItem}`}
@@ -2462,19 +2569,12 @@ export default function App() {
                 variant="unset"
                 border="1px solid"
                 whiteSpace="nowrap"
+                flexShrink={0} // Prevents the button from squishing on mobile
                 transition="all"
-                bg={
-                  searchFilterTag === tagItem
-                    ? "#00E699"
-                    : "rgba(255, 255, 255, 0.02)"
-                }
-                color={
-                  searchFilterTag === tagItem ? "#08090A" : "whiteAlpha.500"
-                }
+                bg={searchFilterTag === tagItem ? accentBase : cardBgSolid}
+                color={searchFilterTag === tagItem ? invertText : textSecondary}
                 borderColor={
-                  searchFilterTag === tagItem
-                    ? "#00E699"
-                    : "rgba(255, 255, 255, 0.05)"
+                  searchFilterTag === tagItem ? accentBase : borderColor
                 }
                 fontWeight={searchFilterTag === tagItem ? "bold" : "normal"}
                 onClick={() => setSearchFilterTag(tagItem)}
@@ -2482,18 +2582,24 @@ export default function App() {
                 {tagItem}
               </Button>
             ))}
-          </HStack>
+          </Flex>
 
           <Text
             fontSize="xs"
-            color="whiteAlpha.400"
+            color={textSecondary}
             tracking="wider"
             mb={4}
             fontFamily="mono"
           >
             {searchQuery.trim()
-              ? `${activeSearchFilteredWins.length} result${activeSearchFilteredWins.length !== 1 ? "s" : ""}`
-              : `${activeSearchFilteredWins.length} ${activeSearchFilteredWins.length === 1 ? "victory" : "victories"}`}
+              ? `${activeSearchFilteredWins.length} result${
+                  activeSearchFilteredWins.length !== 1 ? "s" : ""
+                }`
+              : `${activeSearchFilteredWins.length} ${
+                  activeSearchFilteredWins.length === 1
+                    ? "victory"
+                    : "victories"
+                }`}
           </Text>
 
           <VStack align="stretch" spacing={3}>
@@ -2502,10 +2608,10 @@ export default function App() {
                 <Box
                   key={winObject.id}
                   p={4}
-                  bg="rgba(255, 255, 255, 0.01)"
-                  _hover={{ bg: "rgba(255, 255, 255, 0.03)" }}
+                  bg={cardBg}
+                  _hover={{ bg: cardBgHover }}
                   borderRadius="2xl"
-                  border="1px solid rgba(255, 255, 255, 0.04)"
+                  border={`1px solid ${borderColor}`}
                   transition="all"
                   cursor="pointer"
                   onClick={() => routeToSpecificScreen(winObject.id, "search")}
@@ -2515,7 +2621,7 @@ export default function App() {
                       fontSize="10px"
                       fontFamily="mono"
                       tracking="wider"
-                      color="whiteAlpha.400"
+                      color={textTertiary}
                     >
                       {getRelativeTimelineStringRepresentation(winObject.date)}
                     </Text>
@@ -2523,12 +2629,12 @@ export default function App() {
                       <Badge
                         fontSize="9px"
                         fontFamily="mono"
-                        bg="rgba(0, 230, 153, 0.05)"
-                        color="#00E699"
+                        bg={accentBg}
+                        color={accentBase}
                         px={2.5}
                         py={0.5}
                         borderRadius="md"
-                        border="1px solid rgba(0, 230, 153, 0.15)"
+                        border={`1px solid ${accentBorder}`}
                         textTransform="uppercase"
                         tracking="wider"
                         variant="unset"
@@ -2539,7 +2645,7 @@ export default function App() {
                   </Flex>
                   <Text
                     fontSize="md"
-                    color="whiteAlpha.800"
+                    color={textPrimary}
                     fontWeight="light"
                     lineHeight="relaxed"
                     fontFamily="serif"
@@ -2558,9 +2664,9 @@ export default function App() {
                 textAlign="center"
                 py={12}
                 fontSize="sm"
-                color="whiteAlpha.300"
+                color={textTertiary}
                 fontWeight="light"
-                border="1px dashed rgba(255, 255, 255, 0.08)"
+                border={`1px dashed ${borderColor}`}
                 borderRadius="2xl"
               >
                 {lookupString("no_wins_search")}
@@ -2578,7 +2684,7 @@ export default function App() {
               fontSize="xs"
               textTransform="uppercase"
               tracking="widest"
-              color="whiteAlpha.400"
+              color={textTertiary}
             >
               Victory Journal
             </Text>
@@ -2594,7 +2700,7 @@ export default function App() {
                 as="em"
                 fontStyle="italic"
                 fontWeight="normal"
-                color="#00E699"
+                color={accentBase}
               >
                 timeline.
               </Box>
@@ -2604,23 +2710,23 @@ export default function App() {
           <Flex
             justify="space-between"
             align="center"
-            bg="rgba(255, 255, 255, 0.02)"
+            bg={cardBgSolid}
             rounded="2xl"
             p={2}
-            border="1px solid rgba(255, 255, 255, 0.05)"
+            border={`1px solid ${borderColor}`}
             mb={6}
           >
             <IconButton
               size="md"
               variant="unstyled"
               borderRadius="xl"
-              bg="rgba(12, 12, 16, 0.4)"
+              bg={calNavBg}
               display="flex"
               alignItems="center"
               justifyContent="center"
-              _hover={{ bg: "rgba(12, 12, 16, 0.6)" }}
+              _hover={{ bg: calNavBgHover }}
               _active={{ transform: "scale(0.95)" }}
-              icon={<ChevronLeft size={20} color="#EDE8E0" />}
+              icon={<ChevronLeft size={20} color={textPrimary} />}
               onClick={() => handleMonthStepNavigation(-1)}
             />
             <Text
@@ -2628,7 +2734,7 @@ export default function App() {
               fontWeight="bold"
               textTransform="uppercase"
               tracking="widest"
-              color="#00E699"
+              color={accentBase}
               fontFamily="mono"
             >
               {lookupString("months")[currentCalendarDate.getMonth()]}{" "}
@@ -2638,13 +2744,13 @@ export default function App() {
               size="md"
               variant="unstyled"
               borderRadius="xl"
-              bg="rgba(12, 12, 16, 0.4)"
+              bg={calNavBg}
               display="flex"
               alignItems="center"
               justifyContent="center"
-              _hover={{ bg: "rgba(12, 12, 16, 0.6)" }}
+              _hover={{ bg: calNavBgHover }}
               _active={{ transform: "scale(0.95)" }}
-              icon={<ChevronRight size={20} color="#EDE8E0" />}
+              icon={<ChevronRight size={20} color={textPrimary} />}
               onClick={() => handleMonthStepNavigation(1)}
             />
           </Flex>
@@ -2657,15 +2763,15 @@ export default function App() {
             fontSize="xs"
             textTransform="uppercase"
             tracking="widest"
-            color="whiteAlpha.400"
+            color={textSecondary}
             fontWeight="bold"
             mb={4}
-            borderTop="1px solid rgba(255, 255, 255, 0.05)"
+            borderTop={`1px solid ${borderColor}`}
             pt={6}
           >
             <Box
               as="span"
-              color="#00E699"
+              color={accentBase}
               fontWeight="black"
               fontSize="sm"
               fontFamily="mono"
@@ -2685,10 +2791,10 @@ export default function App() {
                 <Box
                   key={winObject.id}
                   p={4}
-                  bg="rgba(255, 255, 255, 0.01)"
-                  _hover={{ bg: "rgba(255, 255, 255, 0.03)" }}
+                  bg={cardBg}
+                  _hover={{ bg: cardBgHover }}
                   borderRadius="2xl"
-                  border="1px solid rgba(255, 255, 255, 0.04)"
+                  border={`1px solid ${borderColor}`}
                   transition="all"
                   cursor="pointer"
                   onClick={() =>
@@ -2700,7 +2806,7 @@ export default function App() {
                       fontSize="10px"
                       fontFamily="mono"
                       tracking="wider"
-                      color="whiteAlpha.400"
+                      color={textTertiary}
                     >
                       {getRelativeTimelineStringRepresentation(winObject.date)}
                     </Text>
@@ -2708,12 +2814,12 @@ export default function App() {
                       <Badge
                         fontSize="9px"
                         fontFamily="mono"
-                        bg="rgba(0, 230, 153, 0.05)"
-                        color="#00E699"
+                        bg={accentBg}
+                        color={accentBase}
                         px={2.5}
                         py={0.5}
                         borderRadius="md"
-                        border="1px solid rgba(0, 230, 153, 0.15)"
+                        border={`1px solid ${accentBorder}`}
                         textTransform="uppercase"
                         tracking="wider"
                         variant="unset"
@@ -2724,7 +2830,7 @@ export default function App() {
                   </Flex>
                   <Text
                     fontSize="md"
-                    color="whiteAlpha.800"
+                    color={textPrimary}
                     fontWeight="light"
                     lineHeight="relaxed"
                     fontFamily="serif"
@@ -2739,9 +2845,9 @@ export default function App() {
                 textAlign="center"
                 py={8}
                 fontSize="sm"
-                color="whiteAlpha.300"
+                color={textTertiary}
                 fontWeight="light"
-                border="1px dashed rgba(255, 255, 255, 0.08)"
+                border={`1px dashed ${borderColor}`}
                 borderRadius="2xl"
               >
                 {lookupString("no_wins_month")}
@@ -2759,9 +2865,9 @@ export default function App() {
             variant="unstyled"
             display="inline-flex"
             alignItems="center"
-            color="#00E699"
+            color={accentBase}
             mb={6}
-            _hover={{ color: "#00B377" }}
+            _hover={{ color: backBtnHover }}
             transition="colors"
             leftIcon={<ChevronLeft size={16} />}
             onClick={() => executeScreenTransitionPipeline("calendar")}
@@ -2774,7 +2880,7 @@ export default function App() {
               fontSize="xs"
               textTransform="uppercase"
               tracking="widest"
-              color="whiteAlpha.400"
+              color={textTertiary}
             >
               Victory Journal
             </Text>
@@ -2784,15 +2890,17 @@ export default function App() {
               fontFamily="serif"
               fontWeight="light"
               tracking="tight"
-              color="#EDE8E0"
+              color={textPrimary}
             >
               {targetDayData.month !== null &&
-                `${lookupString("months")[targetDayData.month]} ${targetDayData.day}`}
+                `${lookupString("months")[targetDayData.month]} ${
+                  targetDayData.day
+                }`}
             </Heading>
             <Text
               fontSize="sm"
               fontFamily="mono"
-              color="#00E699"
+              color={accentBase}
               fontWeight="bold"
             >
               {targetDayData.dayWins.length} victories
@@ -2804,10 +2912,10 @@ export default function App() {
               <Box
                 key={winObject.id}
                 p={4}
-                bg="rgba(255, 255, 255, 0.02)"
-                _hover={{ bg: "rgba(255, 255, 255, 0.04)" }}
+                bg={cardBgSolid}
+                _hover={{ bg: cardBgHover }}
                 borderRadius="2xl"
-                border="1px solid rgba(255, 255, 255, 0.04)"
+                border={`1px solid ${borderColor}`}
                 transition="all"
                 cursor="pointer"
                 onClick={() => routeToSpecificScreen(winObject.id, "day")}
@@ -2817,7 +2925,7 @@ export default function App() {
                     fontSize="10px"
                     fontFamily="mono"
                     tracking="wider"
-                    color="whiteAlpha.400"
+                    color={textTertiary}
                   >
                     {getRelativeTimelineStringRepresentation(winObject.date)}
                   </Text>
@@ -2825,12 +2933,12 @@ export default function App() {
                     <Badge
                       fontSize="9px"
                       fontFamily="mono"
-                      bg="rgba(0, 230, 153, 0.05)"
-                      color="#00E699"
+                      bg={accentBg}
+                      color={accentBase}
                       px={2.5}
                       py={0.5}
                       borderRadius="md"
-                      border="1px solid rgba(0, 230, 153, 0.15)"
+                      border={`1px solid ${accentBorder}`}
                       textTransform="uppercase"
                       tracking="wider"
                       variant="unset"
@@ -2841,7 +2949,7 @@ export default function App() {
                 </Flex>
                 <Text
                   fontSize="md"
-                  color="whiteAlpha.800"
+                  color={textPrimary}
                   fontWeight="light"
                   lineHeight="relaxed"
                   fontFamily="serif"
@@ -2869,8 +2977,8 @@ export default function App() {
                     variant="unstyled"
                     display="inline-flex"
                     alignItems="center"
-                    color="#00E699"
-                    _hover={{ color: "#00B377" }}
+                    color={accentBase}
+                    _hover={{ color: backBtnHover }}
                     transition="colors"
                     leftIcon={<ChevronLeft size={16} />}
                     onClick={() =>
@@ -2885,9 +2993,9 @@ export default function App() {
                   fontSize="xs"
                   textTransform="uppercase"
                   tracking="widest"
-                  color="whiteAlpha.400"
+                  color={textTertiary}
                   fontFamily="mono"
-                  borderBottom="1px solid rgba(255, 255, 255, 0.06)"
+                  borderBottom={`1px solid ${borderColor}`}
                   pb={4}
                 >
                   {getExtendedLongDateRepresentation(focusItemModel.date)}
@@ -2896,16 +3004,16 @@ export default function App() {
                 {/* Tag Editor Panel */}
                 <Box
                   p={4}
-                  bg="rgba(255, 255, 255, 0.02)"
+                  bg={cardBgSolid}
                   rounded="2xl"
-                  border="1px solid rgba(255, 255, 255, 0.05)"
+                  border={`1px solid ${borderColor}`}
                   className="space-y-3"
                 >
                   <Text
                     fontSize="10px"
                     textTransform="uppercase"
                     tracking="widest"
-                    color="whiteAlpha.400"
+                    color={textSecondary}
                     fontWeight="bold"
                     mb={4}
                   >
@@ -2925,24 +3033,24 @@ export default function App() {
                         transition="all 0.2s"
                         bg={
                           focusItemModel.tag === tagItem
-                            ? "#00E699"
-                            : "rgba(12, 12, 16, 0.4)"
+                            ? accentBase
+                            : tagUnselectedBg
                         }
                         color={
                           focusItemModel.tag === tagItem
-                            ? "#08090A"
-                            : "whiteAlpha.500"
+                            ? invertText
+                            : textSecondary
                         }
                         borderColor={
                           focusItemModel.tag === tagItem
-                            ? "#00E699"
-                            : "rgba(255, 255, 255, 0.05)"
+                            ? accentBase
+                            : borderColor
                         }
                         _hover={{
                           borderColor:
                             focusItemModel.tag === tagItem
-                              ? "#00E699"
-                              : "whiteAlpha.300",
+                              ? accentBase
+                              : textSecondary,
                         }}
                         onClick={() => adjustInlineVictoryTagMapping(tagItem)}
                       >
@@ -2959,16 +3067,10 @@ export default function App() {
                       border="1px dashed"
                       transition="all"
                       borderColor={
-                        !focusItemModel.tag
-                          ? "red.400"
-                          : "rgba(255, 255, 255, 0.05)"
+                        !focusItemModel.tag ? "red.400" : borderColor
                       }
-                      color={!focusItemModel.tag ? "red.400" : "whiteAlpha.300"}
-                      bg={
-                        !focusItemModel.tag
-                          ? "rgba(229, 62, 62, 0.03)"
-                          : "transparent"
-                      }
+                      color={!focusItemModel.tag ? "red.500" : textTertiary}
+                      bg={!focusItemModel.tag ? dangerBg : "transparent"}
                       onClick={() => adjustInlineVictoryTagMapping(null)}
                     >
                       None
@@ -2979,14 +3081,14 @@ export default function App() {
                 {/* Luxury Display Card */}
                 <Flex
                   p={6}
-                  bgGradient="linear(to-br, rgba(255, 255, 255, 0.03), transparent)"
+                  bgGradient={`linear(to-br, ${cardBgHover}, transparent)`}
                   rounded="3xl"
-                  border="1px solid rgba(255, 255, 255, 0.05)"
+                  border={`1px solid ${borderColor}`}
                   relative
                   shadow="xl"
                   minH="160px"
                   flexDirection="column"
-                  justify="center"
+                  justifyContent="center"
                   position="relative"
                 >
                   <Text
@@ -2997,7 +3099,7 @@ export default function App() {
                     fontFamily="serif"
                     pointerEvents="none"
                     userSelect="none"
-                    color="rgba(0, 230, 153, 0.05)"
+                    color={quoteMarkColor}
                     lineHeight="none"
                   >
                     "
@@ -3008,7 +3110,7 @@ export default function App() {
                     fontWeight="light"
                     fontStyle="italic"
                     lineHeight="relaxed"
-                    color="whiteAlpha.900"
+                    color={textPrimary}
                     textAlign="center"
                     px={4}
                     position="relative"
@@ -3022,17 +3124,17 @@ export default function App() {
                 <SimpleGrid columns={2} spacing={3}>
                   <Button
                     py={6}
-                    bg="rgba(255, 255, 255, 0.02)"
+                    bg={cardBgSolid}
                     _hover={{
-                      bg: "rgba(255, 255, 255, 0.05)",
-                      color: "#EDE8E0",
+                      bg: cardBgHover,
+                      color: textPrimary,
                     }}
                     rounded="xl"
-                    border="1px solid rgba(255, 255, 255, 0.05)"
+                    border={`1px solid ${borderColor}`}
                     fontSize="sm"
                     fontWeight="medium"
                     transition="all"
-                    color="#00E699"
+                    color={accentBase}
                     leftIcon={<Share2 size={14} />}
                     onClick={() => triggerModalOverlayActivation("share", true)}
                   >
@@ -3047,23 +3149,15 @@ export default function App() {
                     fontWeight="medium"
                     transition="all"
                     leftIcon={<RefreshCw size={14} />}
-                    bg={
-                      focusItemModel.resurface
-                        ? "#00E699"
-                        : "rgba(255, 255, 255, 0.02)"
-                    }
+                    bg={focusItemModel.resurface ? accentBase : cardBgSolid}
                     color={
-                      focusItemModel.resurface ? "#08090A" : "whiteAlpha.700"
+                      focusItemModel.resurface ? invertText : textSecondary
                     }
                     borderColor={
-                      focusItemModel.resurface
-                        ? "#00E699"
-                        : "rgba(255, 255, 255, 0.05)"
+                      focusItemModel.resurface ? accentBase : borderColor
                     }
                     _hover={{
-                      bg: focusItemModel.resurface
-                        ? "#00B377"
-                        : "rgba(255, 255, 255, 0.05)",
+                      bg: focusItemModel.resurface ? backBtnHover : cardBgHover,
                     }}
                     onClick={toggleVictorySmartResurfacing}
                   >
@@ -3077,9 +3171,9 @@ export default function App() {
                     fontSize="xs"
                     textTransform="uppercase"
                     tracking="widest"
-                    color="red.400"
-                    opacity="0.4"
-                    _hover={{ opacity: 0.9 }}
+                    color="red.500"
+                    opacity="0.6"
+                    _hover={{ opacity: 1 }}
                     fontWeight="medium"
                     transition="colors"
                     onClick={() =>
@@ -3112,7 +3206,7 @@ export default function App() {
                 fontSize="xs"
                 textTransform="uppercase"
                 tracking="widest"
-                color="#00E699"
+                color={accentBase}
                 fontWeight="bold"
                 mb={1}
               >
@@ -3124,7 +3218,7 @@ export default function App() {
                 fontFamily="serif"
                 fontWeight="light"
                 tracking="tight"
-                color="#EDE8E0"
+                color={textPrimary}
               >
                 You've done
                 <br />
@@ -3132,13 +3226,13 @@ export default function App() {
                   as="em"
                   fontStyle="italic"
                   fontWeight="normal"
-                  color="#00E699"
+                  color={accentBase}
                 >
                   hard things.
                 </Box>
               </Heading>
               <Text
-                color="whiteAlpha.400"
+                color={textTertiary}
                 fontSize="xs"
                 mt={2}
                 fontWeight="light"
@@ -3149,9 +3243,10 @@ export default function App() {
 
             <VStack
               p={6}
-              bgGradient="linear(to-b, rgba(147, 51, 234, 0.06), transparent)"
+              bgGradient={spiralEvidenceBg}
               rounded="3xl"
-              border="1px solid rgba(147, 51, 234, 0.15)"
+              border="1px solid"
+              borderColor={spiralEvidenceBorder}
               shadow="2xl"
               minH="140px"
               justify="center"
@@ -3163,7 +3258,7 @@ export default function App() {
                 fontWeight="light"
                 fontStyle="italic"
                 lineHeight="relaxed"
-                color="#EDE8E0"
+                color={textPrimary}
                 textAlign="center"
                 mb={4}
               >
@@ -3175,7 +3270,7 @@ export default function App() {
                 fontFamily="mono"
                 textTransform="uppercase"
                 tracking="widest"
-                color="#00E699"
+                color={accentBase}
                 fontWeight="bold"
               >
                 {spiralWin.details}
@@ -3185,16 +3280,16 @@ export default function App() {
             <VStack
               align="stretch"
               p={5}
-              bg="rgba(255, 255, 255, 0.02)"
+              bg={cardBgSolid}
               rounded="2xl"
-              border="1px solid rgba(255, 255, 255, 0.05)"
+              border={`1px solid ${borderColor}`}
               spacing={2}
             >
               <Text
                 fontSize="10px"
                 textTransform="uppercase"
                 tracking="widest"
-                color="#00E699"
+                color={accentBase}
                 fontWeight="bold"
               >
                 Reflect
@@ -3202,7 +3297,7 @@ export default function App() {
               <Text
                 fontSize="sm"
                 fontWeight="light"
-                color="whiteAlpha.800"
+                color={textSecondary}
                 lineHeight="relaxed"
                 fontFamily="serif"
                 fontStyle="italic"
@@ -3216,9 +3311,9 @@ export default function App() {
             <Button
               w="full"
               py={7}
-              bg="rgba(255, 255, 255, 0.02)"
-              _hover={{ bg: "rgba(255, 255, 255, 0.05)" }}
-              border="1px solid rgba(255, 255, 255, 0.05)"
+              bg={cardBgSolid}
+              _hover={{ bg: cardBgHover }}
+              border={`1px solid ${borderColor}`}
               rounded="2xl"
               fontSize="sm"
               fontWeight="medium"
@@ -3235,8 +3330,8 @@ export default function App() {
               textTransform="uppercase"
               tracking="widest"
               fontFamily="mono"
-              color="whiteAlpha.400"
-              _hover={{ color: "whiteAlpha.700" }}
+              color={textTertiary}
+              _hover={{ color: textSecondary }}
               transition="colors"
               onClick={() => executeScreenTransitionPipeline("home")}
             >
@@ -3253,9 +3348,9 @@ export default function App() {
             size="sm"
             variant="unstyled"
             display="inline-flex"
-            color="#00E699"
+            color={accentBase}
             mb={6}
-            _hover={{ color: "#00B377" }}
+            _hover={{ color: backBtnHover }}
             transition="colors"
             leftIcon={<ChevronLeft size={16} />}
             onClick={() => executeScreenTransitionPipeline("home")}
@@ -3281,16 +3376,16 @@ export default function App() {
                 fontSize="xs"
                 textTransform="uppercase"
                 tracking="widest"
-                color="whiteAlpha.400"
+                color={textTertiary}
                 fontWeight="bold"
               >
                 Your Profile
               </Text>
               <Flex
                 p={4}
-                bg="rgba(255, 255, 255, 0.02)"
+                bg={cardBgSolid}
                 rounded="2xl"
-                border="1px solid rgba(255, 255, 255, 0.05)"
+                border={`1px solid ${borderColor}`}
                 align="center"
                 justifyContent="space-between"
               >
@@ -3298,22 +3393,22 @@ export default function App() {
                   <Text fontSize="sm" fontWeight="medium">
                     Your name
                   </Text>
-                  <Text fontSize="xs" color="whiteAlpha.400" mt={0.5}>
+                  <Text fontSize="xs" color={textTertiary} mt={0.5}>
                     Used in your greeting
                   </Text>
                 </Box>
                 <Input
-                  bg="#08090A"
-                  border="1px solid rgba(255, 255, 255, 0.05)"
+                  bg={bgBase}
+                  border={`1px solid ${borderColor}`}
                   _focus={{
-                    borderColor: "rgba(0, 230, 153, 0.4)",
+                    borderColor: accentBorder,
                     boxShadow: "none",
                   }}
                   rounded="xl"
                   px={3}
                   py={2}
                   fontSize="sm"
-                  color="#EDE8E0"
+                  color={textPrimary}
                   textAlign="right"
                   maxW="140px"
                   outline="none"
@@ -3333,26 +3428,74 @@ export default function App() {
               </Flex>
             </VStack>
 
+            {/* Section: Appearance */}
+            <VStack align="stretch" spacing={3}>
+              <Text
+                fontSize="xs"
+                textTransform="uppercase"
+                tracking="widest"
+                color={textTertiary}
+                fontWeight="bold"
+              >
+                Appearance
+              </Text>
+              <Flex
+                p={4}
+                bg={cardBgSolid}
+                rounded="2xl"
+                border={`1px solid ${borderColor}`}
+                align="center"
+                justifyContent="space-between"
+                cursor="pointer"
+                _hover={{ bg: cardBgHover }}
+                onClick={toggleColorMode}
+                transition="colors"
+              >
+                <Box>
+                  <Text fontSize="sm" fontWeight="medium">
+                    Theme
+                  </Text>
+                  <Text fontSize="xs" color={textTertiary} mt={0.5}>
+                    Toggle {colorMode === "light" ? "dark" : "light"} mode
+                  </Text>
+                </Box>
+                <IconButton
+                  size="sm"
+                  variant="ghost"
+                  color={textSecondary}
+                  icon={
+                    colorMode === "light" ? (
+                      <Moon size={18} />
+                    ) : (
+                      <Sun size={18} />
+                    )
+                  }
+                  onClick={toggleColorMode}
+                  aria-label="Toggle Color Mode"
+                />
+              </Flex>
+            </VStack>
+
             {/* Section: Backups */}
             <VStack align="stretch" spacing={2}>
               <Text
                 fontSize="xs"
                 textTransform="uppercase"
                 tracking="widest"
-                color="whiteAlpha.400"
+                color={textTertiary}
                 fontWeight="bold"
               >
                 Storage & Backup
               </Text>
               <Flex
                 p={4}
-                bg="rgba(255, 255, 255, 0.02)"
+                bg={cardBgSolid}
                 rounded="2xl"
-                border="1px solid rgba(255, 255, 255, 0.05)"
+                border={`1px solid ${borderColor}`}
                 align="center"
                 justifyContent="space-between"
                 cursor="pointer"
-                _hover={{ bg: "rgba(255, 255, 255, 0.04)" }}
+                _hover={{ bg: cardBgHover }}
                 transition="colors"
                 onClick={handleFileSystemBackupExport}
               >
@@ -3360,24 +3503,24 @@ export default function App() {
                   <Text fontSize="sm" fontWeight="medium">
                     Export victories
                   </Text>
-                  <Text fontSize="xs" color="whiteAlpha.400" mt={0.5}>
+                  <Text fontSize="xs" color={textTertiary} mt={0.5}>
                     Download as JSON backup
                   </Text>
                 </Box>
-                <Box color="whiteAlpha.300">
+                <Box color={textTertiary}>
                   <ArrowDown size={16} />
                 </Box>
               </Flex>
 
               <Flex
                 p={4}
-                bg="rgba(255, 255, 255, 0.02)"
+                bg={cardBgSolid}
                 rounded="2xl"
-                border="1px solid rgba(255, 255, 255, 0.05)"
+                border={`1px solid ${borderColor}`}
                 align="center"
                 justifyContent="space-between"
                 cursor="pointer"
-                _hover={{ bg: "rgba(255, 255, 255, 0.04)" }}
+                _hover={{ bg: cardBgHover }}
                 transition="colors"
                 onClick={() => document.getElementById("imp").click()}
               >
@@ -3385,11 +3528,11 @@ export default function App() {
                   <Text fontSize="sm" fontWeight="medium">
                     Import victories
                   </Text>
-                  <Text fontSize="xs" color="whiteAlpha.400" mt={0.5}>
+                  <Text fontSize="xs" color={textTertiary} mt={0.5}>
                     Restore from JSON file
                   </Text>
                 </Box>
-                <Box color="whiteAlpha.300">
+                <Box color={textTertiary}>
                   <ArrowUp size={16} />
                 </Box>
               </Flex>
@@ -3406,13 +3549,13 @@ export default function App() {
             {/* PWA Prompt Link Node */}
             <Flex
               p={4}
-              bg="rgba(255, 255, 255, 0.02)"
+              bg={cardBgSolid}
               rounded="2xl"
-              border="1px solid rgba(255, 255, 255, 0.05)"
+              border={`1px solid ${borderColor}`}
               align="center"
               justifyContent="space-between"
               cursor="pointer"
-              _hover={{ bg: "rgba(255, 255, 255, 0.04)" }}
+              _hover={{ bg: cardBgHover }}
               transition="colors"
               onClick={() => triggerModalOverlayActivation("install", true)}
             >
@@ -3420,11 +3563,11 @@ export default function App() {
                 <Text fontSize="sm" fontWeight="medium">
                   Add to Home Screen
                 </Text>
-                <Text fontSize="xs" color="whiteAlpha.400" mt={0.5}>
+                <Text fontSize="xs" color={textTertiary} mt={0.5}>
                   Works offline, feels native
                 </Text>
               </Box>
-              <Text fontSize="sm" color="whiteAlpha.300">
+              <Text fontSize="sm" color={textTertiary}>
                 →
               </Text>
             </Flex>
@@ -3434,39 +3577,39 @@ export default function App() {
               align="stretch"
               spacing={2}
               pt={4}
-              borderTop="1px solid rgba(255, 255, 255, 0.05)"
+              borderTop={`1px solid ${borderColor}`}
             >
               <Text
                 fontSize="xs"
                 textTransform="uppercase"
                 tracking="widest"
-                color="red.400"
-                opacity="0.6"
+                color="red.500"
+                opacity="0.8"
                 fontWeight="bold"
               >
                 {lookupString("settings_danger")}
               </Text>
               <Flex
                 p={4}
-                bg="rgba(229, 62, 62, 0.01)"
-                border="1px solid rgba(229, 62, 62, 0.12)"
+                bg={dangerBg}
+                border={`1px solid ${dangerBorder}`}
                 rounded="2xl"
                 align="center"
                 justifyContent="space-between"
                 cursor="pointer"
-                _hover={{ bg: "rgba(229, 62, 62, 0.03)" }}
+                _hover={{ bg: dangerHover }}
                 transition="all"
                 onClick={() => triggerModalOverlayActivation("clearAll", true)}
               >
                 <Box>
-                  <Text fontSize="sm" fontWeight="medium" color="red.400">
+                  <Text fontSize="sm" fontWeight="medium" color="red.500">
                     Clear all victories
                   </Text>
-                  <Text fontSize="xs" color="red.400" opacity="0.4" mt={0.5}>
+                  <Text fontSize="xs" color="red.500" opacity="0.6" mt={0.5}>
                     This cannot be undone
                   </Text>
                 </Box>
-                <Box color="red.400" opacity="0.4">
+                <Box color="red.500" opacity="0.6">
                   <Trash2 size={16} />
                 </Box>
               </Flex>
@@ -3479,7 +3622,7 @@ export default function App() {
             fontSize="9px"
             fontFamily="mono"
             tracking="widest"
-            color="whiteAlpha.200"
+            color={textTertiary}
             textTransform="uppercase"
             leading="relaxed"
           >
@@ -3497,9 +3640,9 @@ export default function App() {
           bottom="0"
           left="0"
           right="0"
-          bg="rgba(8, 9, 10, 0.85)"
+          bg={glassBg}
           backdropFilter="blur(24px)"
-          borderTop="1px solid rgba(255, 255, 255, 0.05)"
+          borderTop={`1px solid ${borderColor}`}
           py={3}
           px={6}
           zIndex="40"
@@ -3514,9 +3657,9 @@ export default function App() {
               fontSize="xs"
               tracking="wider"
               transition="all 0.2s"
-              color={screen === "home" ? "#00E699" : "whiteAlpha.400"}
+              color={screen === "home" ? accentBase : textTertiary}
               _hover={{
-                color: screen === "home" ? "#00E699" : "whiteAlpha.700",
+                color: screen === "home" ? accentBase : textSecondary,
               }}
               onClick={() => executeScreenTransitionPipeline("home")}
             >
@@ -3538,9 +3681,9 @@ export default function App() {
               fontSize="xs"
               tracking="wider"
               transition="all 0.2s"
-              color={screen === "search" ? "#00E699" : "whiteAlpha.400"}
+              color={screen === "search" ? accentBase : textTertiary}
               _hover={{
-                color: screen === "search" ? "#00E699" : "whiteAlpha.700",
+                color: screen === "search" ? accentBase : textSecondary,
               }}
               onClick={() => executeScreenTransitionPipeline("search")}
             >
@@ -3562,9 +3705,9 @@ export default function App() {
               fontSize="xs"
               tracking="wider"
               transition="all 0.2s"
-              color={screen === "calendar" ? "#00E699" : "whiteAlpha.400"}
+              color={screen === "calendar" ? accentBase : textTertiary}
               _hover={{
-                color: screen === "calendar" ? "#00E699" : "whiteAlpha.700",
+                color: screen === "calendar" ? accentBase : textSecondary,
               }}
               onClick={() => executeScreenTransitionPipeline("calendar")}
             >
@@ -3589,22 +3732,27 @@ export default function App() {
         isCentered
         size="xs"
       >
-        <ModalOverlay backdropFilter="blur(5px) bg-blackAlpha.400" />
+        <ModalOverlay backdropFilter="blur(5px)" bg={modalOverlayBg} />
         <ModalContent
-          bg="#08090A"
-          border="1px solid rgba(255, 255, 255, 0.08)"
+          bg={bgBase}
+          border={`1px solid ${borderColor}`}
           borderRadius="2xl"
-          color="#EDE8E0"
+          color={textPrimary}
         >
           <ModalHeader fontSize="xl" fontFamily="serif" fontWeight="light">
             Delete this{" "}
-            <Box as="em" fontStyle="italic" fontWeight="normal" color="#00E699">
+            <Box
+              as="em"
+              fontStyle="italic"
+              fontWeight="normal"
+              color={accentBase}
+            >
               victory?
             </Box>
           </ModalHeader>
           <ModalBody
             fontSize="sm"
-            color="whiteAlpha.600"
+            color={textSecondary}
             fontWeight="light"
             lineHeight="relaxed"
           >
@@ -3613,8 +3761,8 @@ export default function App() {
           <ModalFooter display="grid" gridTemplateColumns="1fr 1fr" gap={3}>
             <Button
               py={5}
-              bg="rgba(255, 255, 255, 0.04)"
-              _hover={{ bg: "rgba(255, 255, 255, 0.08)" }}
+              bg={cardBgSolid}
+              _hover={{ bg: cardBgHover }}
               borderRadius="xl"
               fontSize="sm"
               fontWeight="medium"
@@ -3626,7 +3774,7 @@ export default function App() {
               py={5}
               bg="red.500"
               _hover={{ bg: "red.600" }}
-              color="#08090A"
+              color="white"
               fontWeight="bold"
               borderRadius="xl"
               fontSize="sm"
@@ -3646,22 +3794,22 @@ export default function App() {
         isCentered
         size="xs"
       >
-        <ModalOverlay backdropFilter="blur(5px) bg-blackAlpha.400" />
+        <ModalOverlay backdropFilter="blur(5px)" bg={modalOverlayBg} />
         <ModalContent
-          bg="#08090A"
-          border="1px solid rgba(255, 255, 255, 0.08)"
+          bg={bgBase}
+          border={`1px solid ${borderColor}`}
           borderRadius="2xl"
-          color="#EDE8E0"
+          color={textPrimary}
         >
           <ModalHeader fontSize="xl" fontFamily="serif" fontWeight="light">
             Clear{" "}
-            <Box as="em" fontStyle="italic" fontWeight="normal" color="red.400">
+            <Box as="em" fontStyle="italic" fontWeight="normal" color="red.500">
               everything?
             </Box>
           </ModalHeader>
           <ModalBody
             fontSize="sm"
-            color="whiteAlpha.600"
+            color={textSecondary}
             fontWeight="light"
             lineHeight="relaxed"
           >
@@ -3670,8 +3818,8 @@ export default function App() {
           <ModalFooter display="grid" gridTemplateColumns="1fr 1fr" gap={3}>
             <Button
               py={5}
-              bg="rgba(255, 255, 255, 0.04)"
-              _hover={{ bg: "rgba(255, 255, 255, 0.08)" }}
+              bg={cardBgSolid}
+              _hover={{ bg: cardBgHover }}
               borderRadius="xl"
               fontSize="sm"
               fontWeight="medium"
@@ -3683,7 +3831,7 @@ export default function App() {
               py={5}
               bg="red.500"
               _hover={{ bg: "red.600" }}
-              color="#08090A"
+              color="white"
               fontWeight="bold"
               borderRadius="xl"
               fontSize="sm"
@@ -3703,15 +3851,15 @@ export default function App() {
         isCentered
         size="xs"
       >
-        <ModalOverlay backdropFilter="blur(10px)" />
+        <ModalOverlay backdropFilter="blur(10px)" bg={modalOverlayBg} />
         <ModalContent
-          bg="rgba(255, 255, 255, 0.01)"
-          border="1px solid rgba(255, 255, 255, 0.06)"
+          bg={modalContentGlassBg}
+          border={`1px solid ${borderColor}`}
           borderRadius="3xl"
           p={2}
           backdropFilter="blur(24px)"
           shadow="2xl"
-          color="#EDE8E0"
+          color={textPrimary}
         >
           <ModalHeader
             fontSize="lg"
@@ -3720,16 +3868,21 @@ export default function App() {
             textAlign="center"
           >
             Share your{" "}
-            <Box as="em" fontStyle="italic" fontWeight="normal" color="#00E699">
+            <Box
+              as="em"
+              fontStyle="italic"
+              fontWeight="normal"
+              color={accentBase}
+            >
               win.
             </Box>
           </ModalHeader>
           <ModalBody p={4}>
             <Box
               overflow="hidden"
-              border="1px solid rgba(255, 255, 255, 0.05)"
+              border={`1px solid ${borderColor}`}
               borderRadius="2xl"
-              bg="#08090A"
+              bg={colorMode === "dark" ? "#08090A" : "#F7F9FC"}
             >
               {shareCanvasPreviewUrl && (
                 <Image
@@ -3752,9 +3905,9 @@ export default function App() {
             <Button
               w="full"
               py={6}
-              bgGradient="linear(to-br, #00E699, #00B377)"
-              _hover={{ bgGradient: "linear(to-br, #00B377, #00E699)" }}
-              color="#08090A"
+              bgGradient={accentGrad}
+              _hover={{ bgGradient: accentGradHover }}
+              color={invertText}
               fontWeight="bold"
               fontSize="sm"
               borderRadius="xl"
@@ -3767,9 +3920,9 @@ export default function App() {
               <Button
                 w="full"
                 py={6}
-                bg="rgba(255, 255, 255, 0.03)"
-                _hover={{ bg: "rgba(255, 255, 255, 0.05)" }}
-                border="1px solid rgba(255, 255, 255, 0.05)"
+                bg={cardBgSolid}
+                _hover={{ bg: cardBgHover }}
+                border={`1px solid ${borderColor}`}
                 fontSize="sm"
                 fontWeight="medium"
                 borderRadius="xl"
@@ -3784,8 +3937,8 @@ export default function App() {
               py={1}
               fontSize="xs"
               fontFamily="mono"
-              color="whiteAlpha.400"
-              _hover={{ color: "whiteAlpha.700" }}
+              color={textTertiary}
+              _hover={{ color: textSecondary }}
               transition="colors"
               onClick={() => triggerModalOverlayActivation("share", false)}
             >
@@ -3802,46 +3955,51 @@ export default function App() {
         isCentered
         size="xs"
       >
-        <ModalOverlay backdropFilter="blur(10px)" />
+        <ModalOverlay backdropFilter="blur(10px)" bg={modalOverlayBg} />
         <ModalContent
-          bg="rgba(255, 255, 255, 0.01)"
-          border="1px solid rgba(255, 255, 255, 0.06)"
+          bg={modalContentGlassBg}
+          border={`1px solid ${borderColor}`}
           borderRadius="3xl"
           p={3}
           backdropFilter="blur(24px)"
           shadow="2xl"
-          color="#EDE8E0"
+          color={textPrimary}
           textAlign="center"
         >
           <ModalHeader fontSize="lg" fontFamily="serif" fontWeight="light">
             Install the{" "}
-            <Box as="em" fontStyle="italic" fontWeight="normal" color="#00E699">
+            <Box
+              as="em"
+              fontStyle="italic"
+              fontWeight="normal"
+              color={accentBase}
+            >
               app.
             </Box>
           </ModalHeader>
           <ModalBody
             fontSize="sm"
-            color="whiteAlpha.700"
+            color={textSecondary}
             fontWeight="light"
             lineHeight="relaxed"
-            borderTop="1px solid rgba(255, 255, 255, 0.04)"
-            borderBottom="1px solid rgba(255, 255, 255, 0.04)"
+            borderTop={`1px solid ${borderColor}`}
+            borderBottom={`1px solid ${borderColor}`}
             py={5}
             dangerouslySetInnerHTML={{
               __html: /iPhone|iPad/.test(navigator.userAgent)
-                ? 'In Safari: tap the <strong style="color: #EDE8E0; font-weight: 500;">Share button</strong> at the bottom, then <strong style="color: #00E699; font-weight: 500;">"Add to Home Screen"</strong>.'
+                ? `In Safari: tap the <strong style="color: ${colorMode === "dark" ? "#EDE8E0" : "#1A202C"}; font-weight: 500;">Share button</strong> at the bottom, then <strong style="color: ${colorMode === "dark" ? "#00E699" : "#00B377"}; font-weight: 500;">"Add to Home Screen"</strong>.`
                 : /Android/.test(navigator.userAgent)
-                  ? 'In Chrome: tap the <strong style="color: #EDE8E0; font-weight: 500;">three-dot menu</strong>, then <strong style="color: #00E699; font-weight: 500;">"Add to Home screen"</strong>.'
-                  : 'In Chrome or Edge: look for the <strong style="color: #00E699; font-weight: 500;">install icon (⊕)</strong> in the address bar.',
+                  ? `In Chrome: tap the <strong style="color: ${colorMode === "dark" ? "#EDE8E0" : "#1A202C"}; font-weight: 500;">three-dot menu</strong>, then <strong style="color: ${colorMode === "dark" ? "#00E699" : "#00B377"}; font-weight: 500;">"Add to Home screen"</strong>.`
+                  : `In Chrome or Edge: look for the <strong style="color: ${colorMode === "dark" ? "#00E699" : "#00B377"}; font-weight: 500;">install icon (⊕)</strong> in the address bar.`,
             }}
           />
           <ModalFooter p={3}>
             <Button
               w="full"
               py={6}
-              bg="#EDE8E0"
-              _hover={{ bg: "rgba(237, 232, 224, 0.9)" }}
-              color="#08090A"
+              bg={textPrimary}
+              _hover={{ opacity: 0.9 }}
+              color={bgBase}
               fontWeight="bold"
               fontSize="sm"
               borderRadius="xl"
@@ -3854,7 +4012,12 @@ export default function App() {
       </Modal>
 
       {/* System Standard Resolution Rendering Canvas Container */}
-      <canvas id="sc" ref={nativeCanvasRef} className="hidden" />
+      <canvas
+        id="sc"
+        ref={nativeCanvasRef}
+        className="hidden"
+        style={{ display: "none" }}
+      />
     </Box>
   );
 }

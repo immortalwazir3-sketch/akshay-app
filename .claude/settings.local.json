@@ -1,8 +1,0 @@
-{
-  "permissions": {
-    "allow": [
-      "Bash(dir \"c:\\\\my folder\\\\akshay-app\")",
-      "Bash(npm install *)"
-    ]
-  }
-}

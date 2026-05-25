@@ -15,7 +15,7 @@ const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 mongoose
   .connect(process.env.MONGODB_URI)
   .then(() => console.log('Connected to MongoDB'))
-  .catch((err) => { console.error('MongoDB connection error:', err.message); process.exit(1); });
+  .catch((err) => console.error('MongoDB connection error:', err.message));
 
 // ─── User model ───────────────────────────────────────────────────────────────
 const userSchema = new mongoose.Schema({

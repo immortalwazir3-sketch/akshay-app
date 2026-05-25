@@ -1,14 +1,17 @@
-﻿import React from "react";
+import React from "react";
 import {
   Box, Flex, Text, Heading, Button, IconButton,
   Input, VStack, VisuallyHidden,
 } from "@chakra-ui/react";
-import { ChevronLeft, ArrowDown, ArrowUp, Trash2, Plus, X, Moon, Sun } from "lucide-react";
+// Input kept for custom-tag inline form
+import {
+  ChevronLeft, ArrowDown, ArrowUp, Trash2, Plus, X, Moon, Sun,
+} from "lucide-react";
 import { lookupString } from "../utils";
 import { LANGUAGES } from "../constants";
 
 export default function Settings({
-  t, meta, nameInput, setNameInput, onNameChange,
+  t, meta,
   selectedLanguage, setSelectedLanguage,
   showCustomTagInput, setShowCustomTagInput,
   customTagInput, setCustomTagInput,
@@ -25,55 +28,24 @@ export default function Settings({
   } = t;
 
   return (
-    <Box maxW="md" mx="auto" px={6} pt={12}>
+    <Box maxW="md" mx="auto" px={6} pt={12} pb="140px">
       <Button
         size="sm" variant="unstyled" display="inline-flex" color={accentBase}
         mb={6} _hover={{ color: backBtnHover }} transition="colors"
-        leftIcon={<ChevronLeft size={16} />}
-        onClick={onBack}
+        leftIcon={<ChevronLeft size={16} />} onClick={onBack}
       >
         <span>{lookupString("back")}</span>
       </Button>
 
-      <Heading as="h1" fontSize="3xl" fontFamily="'Outfit', sans-serif" fontWeight="800" tracking="tight" mb={8}>
+      <Heading as="h1" fontSize="3xl" fontFamily="'Outfit', sans-serif" fontWeight="800" mb={8}>
         Settings.
       </Heading>
 
       <VStack align="stretch" spacing={6}>
-        {/* Profile */}
-        <VStack align="stretch" spacing={3}>
-          <Text fontSize="xs" textTransform="uppercase" tracking="widest" color={textTertiary} fontWeight="bold">
-            Your Profile
-          </Text>
-          <Flex
-            p={4}
-            bg={colorMode === "dark" ? "rgba(56,189,248,0.08)" : cardBgSolid}
-            rounded="2xl"
-            border={`1px solid ${colorMode === "dark" ? "rgba(56,189,248,0.2)" : borderColor}`}
-            align="center" justifyContent="space-between"
-          >
-            <Box>
-              <Text fontSize="sm" fontWeight="medium">Your name</Text>
-              <Text fontSize="xs" color={textTertiary} mt={0.5}>Used in your greeting</Text>
-            </Box>
-            <Input
-              bg={bgBase} border={`1px solid ${borderColor}`}
-              _focus={{ borderColor: accentBorder, boxShadow: "none" }}
-              rounded="xl" px={3} py={2} fontSize="sm" color={textPrimary}
-              textAlign="right" maxW="140px" outline="none" transition="colors"
-              type="text" placeholder="Add name…" maxLength={32}
-              value={nameInput}
-              onChange={(e) => {
-                setNameInput(e.target.value);
-                onNameChange(e.target.value.trim());
-              }}
-            />
-          </Flex>
-        </VStack>
 
-        {/* Language */}
+        {/* ── Language ─────────────────────────────────────────────────────── */}
         <VStack align="stretch" spacing={3}>
-          <Text fontSize="xs" textTransform="uppercase" tracking="widest" color={textTertiary} fontWeight="bold">
+          <Text fontSize="xs" textTransform="uppercase" letterSpacing="widest" color={textTertiary} fontWeight="bold">
             Transcription Language
           </Text>
           <Box
@@ -103,9 +75,9 @@ export default function Settings({
           </Box>
         </VStack>
 
-        {/* Custom Tags */}
+        {/* ── Custom Tags ──────────────────────────────────────────────────── */}
         <VStack align="stretch" spacing={3}>
-          <Text fontSize="xs" textTransform="uppercase" tracking="widest" color={textTertiary} fontWeight="bold">
+          <Text fontSize="xs" textTransform="uppercase" letterSpacing="widest" color={textTertiary} fontWeight="bold">
             Custom Tags
           </Text>
           <Box
@@ -153,7 +125,8 @@ export default function Settings({
                   }}
                   autoFocus
                 />
-                <Button size="sm" px={4} bgGradient={accentGrad} color={invertText} borderRadius="xl" fontWeight="bold" onClick={() => onAddCustomTag(customTagInput)}>
+                <Button size="sm" px={4} bgGradient={accentGrad} color={invertText} borderRadius="xl" fontWeight="bold"
+                  onClick={() => onAddCustomTag(customTagInput)}>
                   Add
                 </Button>
               </Box>
@@ -164,9 +137,9 @@ export default function Settings({
           </Box>
         </VStack>
 
-        {/* Appearance */}
+        {/* ── Appearance ───────────────────────────────────────────────────── */}
         <VStack align="stretch" spacing={3}>
-          <Text fontSize="xs" textTransform="uppercase" tracking="widest" color={textTertiary} fontWeight="bold">
+          <Text fontSize="xs" textTransform="uppercase" letterSpacing="widest" color={textTertiary} fontWeight="bold">
             Appearance
           </Text>
           <Flex
@@ -191,9 +164,9 @@ export default function Settings({
           </Flex>
         </VStack>
 
-        {/* Backup */}
+        {/* ── Backup ───────────────────────────────────────────────────────── */}
         <VStack align="stretch" spacing={2}>
-          <Text fontSize="xs" textTransform="uppercase" tracking="widest" color={textTertiary} fontWeight="bold">
+          <Text fontSize="xs" textTransform="uppercase" letterSpacing="widest" color={textTertiary} fontWeight="bold">
             Storage & Backup
           </Text>
           <Flex
@@ -202,8 +175,7 @@ export default function Settings({
             rounded="2xl"
             border={`1px solid ${colorMode === "dark" ? "rgba(56,189,248,0.25)" : borderColor}`}
             align="center" justifyContent="space-between" cursor="pointer"
-            _hover={{ bg: cardBgHover }} transition="colors"
-            onClick={onExport}
+            _hover={{ bg: cardBgHover }} transition="colors" onClick={onExport}
           >
             <Box>
               <Text fontSize="sm" fontWeight="medium">Export victories</Text>
@@ -211,7 +183,6 @@ export default function Settings({
             </Box>
             <Box color={textTertiary}><ArrowDown size={16} /></Box>
           </Flex>
-
           <Flex
             p={4}
             bg={colorMode === "dark" ? "rgba(56,189,248,0.10)" : cardBgSolid}
@@ -232,15 +203,14 @@ export default function Settings({
           </VisuallyHidden>
         </VStack>
 
-        {/* PWA install */}
+        {/* ── PWA install ──────────────────────────────────────────────────── */}
         <Flex
           p={4}
           bg={colorMode === "dark" ? "rgba(74,222,128,0.10)" : cardBgSolid}
           rounded="2xl"
           border={`1px solid ${colorMode === "dark" ? "rgba(74,222,128,0.25)" : borderColor}`}
           align="center" justifyContent="space-between" cursor="pointer"
-          _hover={{ bg: cardBgHover }} transition="colors"
-          onClick={onInstall}
+          _hover={{ bg: cardBgHover }} transition="colors" onClick={onInstall}
         >
           <Box>
             <Text fontSize="sm" fontWeight="medium">Add to Home Screen</Text>
@@ -249,16 +219,15 @@ export default function Settings({
           <Text fontSize="sm" color={textTertiary}>→</Text>
         </Flex>
 
-        {/* Danger zone */}
+        {/* ── Danger zone ──────────────────────────────────────────────────── */}
         <VStack align="stretch" spacing={2} pt={4} borderTop={`1px solid ${borderColor}`}>
-          <Text fontSize="xs" textTransform="uppercase" tracking="widest" color="red.500" opacity="0.8" fontWeight="bold">
+          <Text fontSize="xs" textTransform="uppercase" letterSpacing="widest" color="red.500" opacity="0.8" fontWeight="bold">
             {lookupString("settings_danger")}
           </Text>
           <Flex
             p={4} bg={dangerBg} border={`1px solid ${dangerBorder}`} rounded="2xl"
             align="center" justifyContent="space-between" cursor="pointer"
-            _hover={{ bg: dangerHover }} transition="all"
-            onClick={onClearAll}
+            _hover={{ bg: dangerHover }} transition="all" onClick={onClearAll}
           >
             <Box>
               <Text fontSize="sm" fontWeight="medium" color="red.500">Clear all victories</Text>
@@ -271,11 +240,9 @@ export default function Settings({
 
       <Text
         textAlign="center" py={12} fontSize="9px" fontFamily="body"
-        tracking="widest" color={textTertiary} textTransform="uppercase" leading="relaxed"
+        letterSpacing="widest" color={textTertiary} textTransform="uppercase" lineHeight="relaxed"
       >
-        Victory Journal · v3
-        <br />
-        Your proof library
+        Victory Journal · v3<br />Your proof library
       </Text>
     </Box>
   );

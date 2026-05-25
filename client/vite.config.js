@@ -9,7 +9,14 @@ export default defineConfig({
   ].filter(Boolean),
   server: process.env.NODE_ENV !== 'production' ? {
     https: true,
-    host: true
+    host: true,
+    proxy: {
+      '/api': {
+        target: 'http://localhost:5000',
+        changeOrigin: true,
+        secure: false,
+      },
+    },
   } : {},
   build: {
     outDir: 'dist',

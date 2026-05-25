@@ -16,6 +16,8 @@ import {
 } from "./constants";
 import { lookupString, getExtendedLongDateRepresentation } from "./utils";
 
+import Login from "./pages/Login";
+import Profile from "./pages/Profile";
 import Onboarding1 from "./pages/Onboarding1";
 import Onboarding2 from "./pages/Onboarding2";
 import Home from "./pages/Home";
@@ -29,8 +31,24 @@ import Stack from "./pages/Stack";
 import NavBar from "./components/NavBar";
 import Modals from "./components/Modals";
 
+function decodeToken(token) {
+  try {
+    const payload = JSON.parse(atob(token.split(".")[1]));
+    if (payload.exp * 1000 < Date.now()) return null;
+    return { token, id: payload.id, email: payload.email, name: payload.name || "", picture: payload.picture || "" };
+  } catch {
+    return null;
+  }
+}
+
 export default function App() {
   const { colorMode, toggleColorMode } = useColorMode();
+
+  // ─── Auth ────────────────────────────────────────────────────────────────────
+  const [user, setUser] = useState(() => {
+    const saved = localStorage.getItem("vj4_token");
+    return saved ? decodeToken(saved) : null;
+  });
 
   // ─── Theme tokens ───────────────────────────────────────────────────────────
   const bgBase = useColorModeValue("#f5f3f7", "#08090A");
@@ -235,11 +253,15 @@ export default function App() {
   const [meta, setMeta] = useState(() =>
     JSON.parse(localStorage.getItem("vj4m") || "{}"),
   );
-  const [screen, setScreen] = useState(meta.onboarded ? "home" : "ob1");
+  const [screen, setScreen] = useState(() => {
+    const saved = localStorage.getItem("vj4_token");
+    if (!saved || !decodeToken(saved)) return "login";
+    return JSON.parse(localStorage.getItem("vj4m") || "{}").onboarded ? "home" : "ob1";
+  });
   const [selectedLanguage, setSelectedLanguage] = useState(
     () => localStorage.getItem("vj_slang") || "en-IN",
   );
-  const [nameInput, setNameInput] = useState(meta.name || "");
+  const [nameInput, setNameInput] = useState(user?.name || "");
   const [liveText, setLiveText] = useState("");
   const [textInputBox, setTextInputBox] = useState("");
   const [selectedTag, setSelectedTag] = useState(null);
@@ -367,6 +389,24 @@ export default function App() {
     }
   }, []);
 
+  // ─── Auth handlers ───────────────────────────────────────────────────────────
+  const handleLoginSuccess = ({ token, user: userData }) => {
+    localStorage.setItem("vj4_token", token);
+    setUser({ token, ...userData });
+    setScreen(meta.onboarded ? "home" : "ob1");
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("vj4_token");
+    setUser(null);
+    setScreen("login");
+  };
+
+  const handleUpdateUser = ({ token, user: userData }) => {
+    localStorage.setItem("vj4_token", token);
+    setUser({ token, ...userData });
+  };
+
   // ─── Helpers ─────────────────────────────────────────────────────────────────
   const displayToast = (message) =>
     chakraToast({
@@ -438,10 +478,19 @@ export default function App() {
   });
 
   // ─── Onboarding ──────────────────────────────────────────────────────────────
-  const completeOnboarding = () => {
-    const cfg = { ...meta, onboarded: true };
-    if (nameInput.trim()) cfg.name = nameInput.trim();
-    setMeta(cfg);
+  const completeOnboarding = async () => {
+    setMeta({ ...meta, onboarded: true });
+    if (nameInput.trim() && user?.token) {
+      try {
+        const res = await fetch("/api/auth/profile", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${user.token}` },
+          body: JSON.stringify({ name: nameInput.trim() }),
+        });
+        const data = await res.json();
+        if (res.ok) handleUpdateUser(data);
+      } catch {}
+    }
     if (!wins.length) {
       setWins([
         {
@@ -626,7 +675,10 @@ export default function App() {
       displayToast(`Sending ${Math.round(blob.size / 1024)}kb to server…`);
       const res = await fetch("/api/transcribe", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...(user?.token ? { Authorization: `Bearer ${user.token}` } : {}),
+        },
         body: JSON.stringify({
           audio: b64,
           mimeType: activeMime,
@@ -1067,9 +1119,8 @@ export default function App() {
             (a, b) => new Date(b.date) - new Date(a.date),
           ),
         );
-        if (data.meta?.name && !meta.name) {
-          setMeta((prev) => ({ ...prev, name: data.meta.name }));
-          setNameInput(data.meta.name);
+        if (data.meta?.customTags && !meta.customTags) {
+          setMeta((prev) => ({ ...prev, customTags: data.meta.customTags }));
         }
         displayToast(`Imported ${newWins.length} victories`);
       } catch (e) {
@@ -1111,6 +1162,19 @@ export default function App() {
               }
         }
       >
+        {screen === "login" && (
+          <Login t={t} onLoginSuccess={handleLoginSuccess} />
+        )}
+        {screen === "profile" && (
+          <Profile
+            t={t}
+            user={user}
+            wins={wins}
+            onBack={() => navigate("home")}
+            onLogout={handleLogout}
+            onUpdateUser={handleUpdateUser}
+          />
+        )}
         {screen === "ob1" && (
           <Onboarding1 t={t} onNext={() => navigate("ob2")} />
         )}
@@ -1125,6 +1189,7 @@ export default function App() {
         {screen === "home" && (
           <Home
             t={t}
+            user={user}
             meta={meta}
             wins={wins}
             stats={stats}
@@ -1236,9 +1301,6 @@ export default function App() {
           <Settings
             t={t}
             meta={meta}
-            nameInput={nameInput}
-            setNameInput={setNameInput}
-            onNameChange={(name) => setMeta((prev) => ({ ...prev, name }))}
             selectedLanguage={selectedLanguage}
             setSelectedLanguage={setSelectedLanguage}
             showCustomTagInput={showCustomTagInput}

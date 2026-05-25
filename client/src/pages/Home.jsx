@@ -1,18 +1,7 @@
 ﻿import React from "react";
 import {
-  Box,
-  Flex,
-  Text,
-  Heading,
-  Button,
-  IconButton,
-  HStack,
-  VStack,
-  Badge,
-  Textarea,
-  Input,
-  SimpleGrid,
-  Portal,
+  Box, Flex, Text, Heading, Button, IconButton,
+  HStack, VStack, Badge, Textarea, Input, SimpleGrid, Portal, Avatar,
 } from "@chakra-ui/react";
 import { Settings, Info, Plus, X } from "lucide-react";
 import {
@@ -23,6 +12,7 @@ import {
 
 export default function Home({
   t,
+  user,
   meta,
   wins,
   stats,
@@ -100,23 +90,53 @@ export default function Home({
             fontWeight="800"
             tracking="tight"
           >
-            {meta.name ? (
-              <span>{meta.name}'s Stack</span>
+            {user?.name ? (
+              <span>{user.name}'s Stack</span>
             ) : (
               <span>Your Stack</span>
             )}
           </Heading>
         </Box>
-        <IconButton
-          p={3}
-          bg={cardBgSolid}
-          _hover={{ bg: cardBgHover, borderColor: accentBorder }}
-          borderRadius="xl"
-          transition="all 0.2s"
-          border={`1px solid ${borderColor}`}
-          icon={<Settings size={18} color={textPrimary} />}
-          onClick={() => onNavigate("settings")}
-        />
+        <Flex gap={2} align="center">
+          <IconButton
+            p={3}
+            bg={cardBgSolid}
+            _hover={{ bg: cardBgHover, borderColor: accentBorder }}
+            borderRadius="xl"
+            transition="all 0.2s"
+            border={`1px solid ${borderColor}`}
+            icon={<Settings size={18} color={textPrimary} />}
+            onClick={() => onNavigate("settings")}
+            aria-label="Settings"
+          />
+          <Box
+            as="button"
+            onClick={() => onNavigate("profile")}
+            borderRadius="xl"
+            border="1px solid"
+            borderColor={borderColor}
+            bg={cardBgSolid}
+            p="6px"
+            _hover={{ borderColor: accentBorder, bg: cardBgHover }}
+            transition="all 0.2s"
+            display="flex"
+            alignItems="center"
+            justifyContent="center"
+            aria-label="Profile"
+          >
+            <Avatar
+              size="xs"
+              name={user?.name || user?.email || "?"}
+              src={user?.picture || undefined}
+              bg={accentBase}
+              color={colorMode === "dark" ? "#08090A" : "white"}
+              fontWeight="bold"
+              w="28px"
+              h="28px"
+              fontSize="10px"
+            />
+          </Box>
+        </Flex>
       </Flex>
 
       {/* Stats bento grid */}

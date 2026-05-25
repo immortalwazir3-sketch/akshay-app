@@ -5,6 +5,17 @@ import { Home, RefreshCw, Calendar, Search, Mic, Square } from "lucide-react";
 export default function NavBar({ t, screen, isRecording, onNavigate, onMicToggle }) {
   const { accentBase, textTertiary, textSecondary, glassBg, colorMode } = t;
 
+  const iconBtn = (label, icon, target) => (
+    <IconButton
+      aria-label={label}
+      icon={icon}
+      onClick={() => onNavigate(target)}
+      variant="ghost"
+      color={screen === target ? accentBase : textTertiary}
+      _hover={{ color: screen === target ? accentBase : textSecondary, bg: "transparent" }}
+    />
+  );
+
   return (
     <Box
       position="fixed"
@@ -25,22 +36,10 @@ export default function NavBar({ t, screen, isRecording, onNavigate, onMicToggle
       px={4}
     >
       <Flex w="full" justify="space-around" align="center">
-        <IconButton
-          aria-label="Go to home"
-          icon={<Home size={18} />}
-          onClick={() => onNavigate("home")}
-          variant="ghost"
-          color={screen === "home" ? accentBase : textTertiary}
-          _hover={{ color: screen === "home" ? accentBase : textSecondary, bg: "transparent" }}
-        />
-        <IconButton
-          aria-label="Open victory stack"
-          icon={<RefreshCw size={18} />}
-          onClick={() => onNavigate("stack")}
-          variant="ghost"
-          color={screen === "stack" ? accentBase : textTertiary}
-          _hover={{ color: screen === "stack" ? accentBase : textSecondary, bg: "transparent" }}
-        />
+        {iconBtn("Home", <Home size={18} />, "home")}
+        {iconBtn("Stack", <RefreshCw size={18} />, "stack")}
+
+        {/* Mic */}
         <Box position="relative" display="inline-flex" alignItems="center" justifyContent="center">
           {isRecording && (
             <>
@@ -54,35 +53,18 @@ export default function NavBar({ t, screen, isRecording, onNavigate, onMicToggle
             color="white"
             display="flex" alignItems="center" justifyContent="center"
             shadow={isRecording ? "0 0 24px rgba(229,62,62,0.45)" : "0 8px 20px rgba(0,0,0,0.15)"}
-            cursor="pointer"
-            onClick={onMicToggle}
-            border="none"
+            cursor="pointer" onClick={onMicToggle} border="none"
             transition="background 0.3s ease, box-shadow 0.3s ease"
             style={{ animation: isRecording ? "micPulse 1.2s ease-in-out infinite" : "none" }}
           >
-            {isRecording && window.MediaRecorder ? (
-              <Square size={20} fill="currentColor" stroke="none" />
-            ) : (
-              <Mic size={24} />
-            )}
+            {isRecording && window.MediaRecorder
+              ? <Square size={20} fill="currentColor" stroke="none" />
+              : <Mic size={24} />}
           </Box>
         </Box>
-        <IconButton
-          aria-label="Open calendar"
-          icon={<Calendar size={18} />}
-          onClick={() => onNavigate("calendar")}
-          variant="ghost"
-          color={screen === "calendar" ? accentBase : textTertiary}
-          _hover={{ color: screen === "calendar" ? accentBase : textSecondary, bg: "transparent" }}
-        />
-        <IconButton
-          aria-label="Open search"
-          icon={<Search size={18} />}
-          onClick={() => onNavigate("search")}
-          variant="ghost"
-          color={screen === "search" ? accentBase : textTertiary}
-          _hover={{ color: screen === "search" ? accentBase : textSecondary, bg: "transparent" }}
-        />
+
+        {iconBtn("Calendar", <Calendar size={18} />, "calendar")}
+        {iconBtn("Search", <Search size={18} />, "search")}
       </Flex>
     </Box>
   );

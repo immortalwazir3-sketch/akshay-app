@@ -1,7 +1,0 @@
-{
-  "permissions": {
-    "allow": [
-      "Bash(node --input-type=module --eval \"import app from './index.js'; console.log\\('ESM import OK'\\);\")"
-    ]
-  }
-}

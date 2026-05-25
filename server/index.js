@@ -12,10 +12,25 @@ const JWT_SECRET = process.env.JWT_SECRET || 'change-this-secret-in-production';
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 // ─── MongoDB ──────────────────────────────────────────────────────────────────
-mongoose
-  .connect(process.env.MONGODB_URI)
-  .then(() => console.log('Connected to MongoDB'))
-  .catch((err) => console.error('MongoDB connection error:', err.message));
+// Cache the connection promise across serverless invocations to avoid cold-start
+// reconnects on every request. Vercel reuses the module between warm invocations.
+let _dbPromise = null;
+function connectDB() {
+  if (_dbPromise) return _dbPromise;
+  _dbPromise = mongoose
+    .connect(process.env.MONGODB_URI, {
+      serverSelectionTimeoutMS: 5000,
+      connectTimeoutMS: 5000,
+      socketTimeoutMS: 10000,
+    })
+    .then((m) => { console.log('Connected to MongoDB'); return m; })
+    .catch((err) => {
+      console.error('MongoDB connection error:', err.message);
+      _dbPromise = null; // allow retry on next request
+      throw err;
+    });
+  return _dbPromise;
+}
 
 // ─── User model ───────────────────────────────────────────────────────────────
 const userSchema = new mongoose.Schema({
@@ -71,12 +86,14 @@ app.post('/api/auth/register', async (req, res) => {
     return res.status(400).json({ error: 'Password must be at least 6 characters' });
 
   try {
+    await connectDB();
     const hash = await bcrypt.hash(password, 12);
     const user = await User.create({ email, password: hash });
     res.status(201).json({ token: makeToken(user), user: safeUser(user) });
   } catch (err) {
     if (err.code === 11000)
       return res.status(409).json({ error: 'An account with this email already exists' });
+    console.error('register error:', err);
     res.status(500).json({ error: 'Server error — please try again' });
   }
 });
@@ -88,6 +105,7 @@ app.post('/api/auth/login', async (req, res) => {
     return res.status(400).json({ error: 'Email and password are required' });
 
   try {
+    await connectDB();
     const user = await User.findOne({ email: email.toLowerCase() });
     if (!user || !user.password)
       return res.status(401).json({ error: 'Invalid email or password' });
@@ -96,7 +114,8 @@ app.post('/api/auth/login', async (req, res) => {
     if (!valid) return res.status(401).json({ error: 'Invalid email or password' });
 
     res.json({ token: makeToken(user), user: safeUser(user) });
-  } catch {
+  } catch (err) {
+    console.error('login error:', err);
     res.status(500).json({ error: 'Server error — please try again' });
   }
 });
@@ -110,10 +129,17 @@ app.post('/api/auth/google', async (req, res) => {
     return res.status(500).json({ error: 'Google Sign-In is not configured on this server' });
 
   try {
-    const ticket = await googleClient.verifyIdToken({
-      idToken: credential,
-      audience: process.env.GOOGLE_CLIENT_ID,
-    });
+    await connectDB();
+
+    // Race verifyIdToken against a 7-second timeout so a stalled Google handshake
+    // doesn't hold the serverless function open until Vercel's hard limit.
+    const timeout = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error('Google verification timed out')), 7000)
+    );
+    const ticket = await Promise.race([
+      googleClient.verifyIdToken({ idToken: credential, audience: process.env.GOOGLE_CLIENT_ID }),
+      timeout,
+    ]);
     const { sub: googleId, email, name, picture } = ticket.getPayload();
 
     let user = await User.findOne({ $or: [{ googleId }, { email }] });
@@ -128,7 +154,8 @@ app.post('/api/auth/google', async (req, res) => {
       user = await User.create({ email, googleId, name: name || '', picture: picture || '' });
     }
     res.json({ token: makeToken(user), user: safeUser(user) });
-  } catch {
+  } catch (err) {
+    console.error('google sign-in error:', err.message);
     res.status(401).json({ error: 'Google sign-in failed — please try again' });
   }
 });
@@ -140,6 +167,7 @@ app.post('/api/auth/google-token', async (req, res) => {
     return res.status(400).json({ error: 'Invalid Google profile data' });
 
   try {
+    await connectDB();
     let user = await User.findOne({ $or: [{ googleId }, { email }] });
     if (user) {
       if (!user.googleId) {
@@ -162,8 +190,11 @@ app.post('/api/auth/google-token', async (req, res) => {
           await existing.save();
           return res.json({ token: makeToken(existing), user: safeUser(existing) });
         }
-      } catch {}
+      } catch (innerErr) {
+        console.error('google-token dedup error:', innerErr);
+      }
     }
+    console.error('google-token error:', err);
     res.status(500).json({ error: 'Server error — please try again' });
   }
 });
@@ -171,10 +202,12 @@ app.post('/api/auth/google-token', async (req, res) => {
 // Get current user
 app.get('/api/auth/me', authMiddleware, async (req, res) => {
   try {
+    await connectDB();
     const user = await User.findById(req.user.id).select('-password');
     if (!user) return res.status(404).json({ error: 'User not found' });
     res.json({ user: safeUser(user) });
-  } catch {
+  } catch (err) {
+    console.error('me error:', err);
     res.status(500).json({ error: 'Server error' });
   }
 });
@@ -186,13 +219,15 @@ app.patch('/api/auth/profile', authMiddleware, async (req, res) => {
     return res.status(400).json({ error: 'Invalid name' });
 
   try {
+    await connectDB();
     const user = await User.findByIdAndUpdate(
       req.user.id,
       { name: name.trim() },
       { new: true }
     ).select('-password');
     res.json({ token: makeToken(user), user: safeUser(user) });
-  } catch {
+  } catch (err) {
+    console.error('profile update error:', err);
     res.status(500).json({ error: 'Server error' });
   }
 });

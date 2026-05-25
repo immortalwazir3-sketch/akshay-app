@@ -33,13 +33,19 @@ const User = mongoose.model('User', userSchema);
 const allowedOrigins = (process.env.CLIENT_ORIGIN || 'http://localhost:5173')
   .split(',').map((s) => s.trim());
 
-app.use(cors({
+const corsOptions = {
   origin: (origin, cb) => {
-    if (!origin || allowedOrigins.includes(origin)) cb(null, true);
-    else cb(new Error('Not allowed by CORS'));
+    if (!origin) return cb(null, true);          // Postman / server-to-server
+    if (allowedOrigins.includes(origin)) return cb(null, true);
+    cb(null, false);                             // reject cleanly — no 500
   },
   credentials: true,
-}));
+  methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+};
+
+app.options('*', cors(corsOptions));  // handle every OPTIONS preflight first
+app.use(cors(corsOptions));
 app.use(express.json({ limit: '50mb' }));
 
 function authMiddleware(req, res, next) {

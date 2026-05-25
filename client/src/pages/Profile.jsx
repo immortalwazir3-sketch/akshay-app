@@ -4,6 +4,7 @@ import {
   Input, FormControl, FormLabel, Avatar,
 } from "@chakra-ui/react";
 import { ChevronLeft, LogOut, Edit2, Check, X } from "lucide-react";
+import { apiUrl } from "../lib/api";
 
 export default function Profile({ t, user, wins, onBack, onLogout, onUpdateUser }) {
   const {
@@ -52,7 +53,7 @@ export default function Profile({ t, user, wins, onBack, onLogout, onUpdateUser 
     setSaving(true);
     setError("");
     try {
-      const res = await fetch("/api/auth/profile", {
+      const res = await fetch(apiUrl("/api/auth/profile"), {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",

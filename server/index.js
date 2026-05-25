@@ -1,10 +1,10 @@
-const express = require('express');
-const cors = require('cors');
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
-const mongoose = require('mongoose');
-const { OAuth2Client } = require('google-auth-library');
-require('dotenv').config();
+import express from 'express';
+import cors from 'cors';
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
+import mongoose from 'mongoose';
+import { OAuth2Client } from 'google-auth-library';
+import 'dotenv/config';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -20,8 +20,8 @@ mongoose
 // ─── User model ───────────────────────────────────────────────────────────────
 const userSchema = new mongoose.Schema({
   email:     { type: String, required: true, unique: true, lowercase: true, trim: true },
-  password:  { type: String },          // null for Google-only accounts
-  googleId:  { type: String },          // null for email/password accounts
+  password:  { type: String },
+  googleId:  { type: String },
   name:      { type: String, default: '' },
   picture:   { type: String, default: '' },
   createdAt: { type: Date, default: Date.now },
@@ -30,7 +30,16 @@ const userSchema = new mongoose.Schema({
 const User = mongoose.model('User', userSchema);
 
 // ─── Middleware ───────────────────────────────────────────────────────────────
-app.use(cors({ origin: process.env.CLIENT_ORIGIN || 'http://localhost:5173', credentials: true }));
+const allowedOrigins = (process.env.CLIENT_ORIGIN || 'http://localhost:5173')
+  .split(',').map((s) => s.trim());
+
+app.use(cors({
+  origin: (origin, cb) => {
+    if (!origin || allowedOrigins.includes(origin)) cb(null, true);
+    else cb(new Error('Not allowed by CORS'));
+  },
+  credentials: true,
+}));
 app.use(express.json({ limit: '50mb' }));
 
 function authMiddleware(req, res, next) {
@@ -57,7 +66,7 @@ function safeUser(user) {
   return { id: user._id, email: user.email, name: user.name, picture: user.picture };
 }
 
-// ─── Auth routes ─────────────────────────────────────────────────────────────
+// ─── Routes ──────────────────────────────────────────────────────────────────
 
 // Register
 app.post('/api/auth/register', async (req, res) => {
@@ -100,7 +109,7 @@ app.post('/api/auth/login', async (req, res) => {
   }
 });
 
-// Google Sign-In — receives the ID token from the frontend
+// Google Sign-In — ID token flow
 app.post('/api/auth/google', async (req, res) => {
   const { credential } = req.body;
   if (!credential)
@@ -113,12 +122,10 @@ app.post('/api/auth/google', async (req, res) => {
       idToken: credential,
       audience: process.env.GOOGLE_CLIENT_ID,
     });
-    const payload = ticket.getPayload();
-    const { sub: googleId, email, name, picture } = payload;
+    const { sub: googleId, email, name, picture } = ticket.getPayload();
 
     let user = await User.findOne({ $or: [{ googleId }, { email }] });
     if (user) {
-      // Link Google ID if this email was previously registered with password
       if (!user.googleId) {
         user.googleId = googleId;
         user.name = user.name || name;
@@ -126,27 +133,15 @@ app.post('/api/auth/google', async (req, res) => {
         await user.save();
       }
     } else {
-      user = await User.create({ email, googleId, name, picture });
+      user = await User.create({ email, googleId, name: name || '', picture: picture || '' });
     }
-
     res.json({ token: makeToken(user), user: safeUser(user) });
-  } catch (err) {
+  } catch {
     res.status(401).json({ error: 'Google sign-in failed — please try again' });
   }
 });
 
-// Get current user
-app.get('/api/auth/me', authMiddleware, async (req, res) => {
-  try {
-    const user = await User.findById(req.user.id).select('-password');
-    if (!user) return res.status(404).json({ error: 'User not found' });
-    res.json({ user: safeUser(user) });
-  } catch {
-    res.status(500).json({ error: 'Server error' });
-  }
-});
-
-// Google Sign-In — access_token flow (profile from Google userinfo endpoint)
+// Google Sign-In — access_token / userinfo flow
 app.post('/api/auth/google-token', async (req, res) => {
   const { sub: googleId, email, name, picture } = req.body;
   if (!googleId || !email)
@@ -181,6 +176,17 @@ app.post('/api/auth/google-token', async (req, res) => {
   }
 });
 
+// Get current user
+app.get('/api/auth/me', authMiddleware, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).select('-password');
+    if (!user) return res.status(404).json({ error: 'User not found' });
+    res.json({ user: safeUser(user) });
+  } catch {
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
 // Update profile name
 app.patch('/api/auth/profile', authMiddleware, async (req, res) => {
   const { name } = req.body;
@@ -199,6 +205,12 @@ app.patch('/api/auth/profile', authMiddleware, async (req, res) => {
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`Victory Journal server running on http://localhost:${PORT}`);
-});
+// ─── Start ────────────────────────────────────────────────────────────────────
+// Vercel runs this file as a module import — skip listen() in that environment.
+if (process.env.VERCEL !== '1') {
+  app.listen(PORT, () => {
+    console.log(`Victory Journal server running on http://localhost:${PORT}`);
+  });
+}
+
+export default app;

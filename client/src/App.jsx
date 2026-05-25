@@ -30,6 +30,7 @@ import Settings from "./pages/Settings";
 import Stack from "./pages/Stack";
 import NavBar from "./components/NavBar";
 import Modals from "./components/Modals";
+import { apiUrl } from "./lib/api";
 
 function decodeToken(token) {
   try {
@@ -482,7 +483,7 @@ export default function App() {
     setMeta({ ...meta, onboarded: true });
     if (nameInput.trim() && user?.token) {
       try {
-        const res = await fetch("/api/auth/profile", {
+        const res = await fetch(apiUrl("/api/auth/profile"), {
           method: "PATCH",
           headers: { "Content-Type": "application/json", Authorization: `Bearer ${user.token}` },
           body: JSON.stringify({ name: nameInput.trim() }),
@@ -673,7 +674,7 @@ export default function App() {
         fr.readAsDataURL(blob);
       });
       displayToast(`Sending ${Math.round(blob.size / 1024)}kb to server…`);
-      const res = await fetch("/api/transcribe", {
+      const res = await fetch(apiUrl("/api/transcribe"), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

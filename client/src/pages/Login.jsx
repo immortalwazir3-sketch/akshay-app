@@ -5,8 +5,7 @@ import {
 } from "@chakra-ui/react";
 import { useGoogleLogin } from "@react-oauth/google";
 import { Sparkles, Eye, EyeOff } from "lucide-react";
-
-const API = "/api";
+import { apiUrl } from "../lib/api";
 
 // Google "G" logo SVG
 function GoogleIcon() {
@@ -54,7 +53,7 @@ export default function Login({ t, onLoginSuccess }) {
         const profile = await profileRes.json();
 
         // Send to our backend — we pass the sub+email+name+picture directly
-        const res = await fetch(`${API}/auth/google-token`, {
+        const res = await fetch(apiUrl("/api/auth/google-token"), {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(profile),
@@ -79,7 +78,7 @@ export default function Login({ t, onLoginSuccess }) {
 
     setLoading(true);
     try {
-      const res = await fetch(`${API}/auth/${tab === "login" ? "login" : "register"}`, {
+      const res = await fetch(apiUrl(`/api/auth/${tab === "login" ? "login" : "register"}`), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: email.trim(), password }),

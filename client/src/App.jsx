@@ -316,6 +316,7 @@ export default function App() {
     listening,
     resetTranscript,
     browserSupportsSpeechRecognition,
+    isMicrophoneAvailable,
   } = useSpeechRecognition();
   const hasVoiceSupport = browserSupportsSpeechRecognition;
   const chakraToast = useToast();
@@ -363,20 +364,60 @@ export default function App() {
 
   useEffect(() => {
     if (browserSupportsSpeechRecognition) {
-      // Only mirror transcript → liveText while the user hasn't entered edit mode.
-      // Without this guard, late-arriving transcript events (common with
-      // continuous:true) overwrite whatever the user already typed/edited.
+      // Mirror live (interim) transcript → liveText while the user hasn't manually
+      // edited. isEditableMode = true after stop, so this naturally stops updating.
       if (!isEditableMode) {
         setLiveText(transcript);
       }
-      if (!listening && transcript.trim() && !isEditableMode) {
-        setLiveText(transcript); // lock in the final transcript
+      // When recognition fully stops, ALWAYS capture the final transcript —
+      // no isEditableMode guard here. stopRecording() reads transcript before
+      // stopListening() resolves, so the browser's final (corrected) result
+      // arrives AFTER isEditableMode is already true. Without this, the last
+      // word or any correction from interim→final is silently dropped.
+      if (!listening && transcript.trim()) {
+        setLiveText(transcript);
         setIsEditableMode(true);
         setTranscriptionStatus("idle");
       }
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [transcript, listening, browserSupportsSpeechRecognition, isEditableMode]);
+  // isEditableMode intentionally not in deps: the !listening branch must not be
+  // gated on it, and the live mirror reads it correctly via render closure.
+  }, [transcript, listening, browserSupportsSpeechRecognition]);
+
+  // Show error when microphone permission is denied (library sets isMicrophoneAvailable=false
+  // via the onerror "not-allowed" event — this is the only way to detect it).
+  useEffect(() => {
+    if (!isMicrophoneAvailable) {
+      const msg = "Microphone access denied. Allow mic permission in browser settings and retry.";
+      setSpeechError(msg);
+      displayToast("🎤 " + msg);
+      setIsRecording(false);
+      setTranscriptionStatus("idle");
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isMicrophoneAvailable]);
+
+  // Detect when recognition silently stops while recording is still active.
+  // This happens when: network drops, browser aborts recognition, or on some mobile
+  // browsers that auto-stop after silence even with continuous:true.
+  useEffect(() => {
+    if (isRecording && !listening && browserSupportsSpeechRecognition) {
+      // Give the library 800ms to restart (it auto-restarts on continuous:true).
+      // If still not listening after that, it silently failed — show an error.
+      const t = setTimeout(() => {
+        if (isRecording && !listening) {
+          const msg = "Recognition stopped unexpectedly. Tap mic to try again.";
+          setSpeechError(msg);
+          displayToast("🎤 " + msg);
+          setIsRecording(false);
+          setTranscriptionStatus("idle");
+        }
+      }, 800);
+      return () => clearTimeout(t);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [listening, isRecording]);
 
   useEffect(() => {
     if (meta.onboarded) {
@@ -512,6 +553,15 @@ export default function App() {
 
   // ─── Recording ──────────────────────────────────────────────────────────────
   const startRecording = async () => {
+    // Bail out early if the browser has no Web Speech API — the Whisper fallback
+    // was removed, so there is nothing to fall back to. Show a toast (visible on
+    // every screen) instead of silently doing nothing while isRecording=true.
+    if (!browserSupportsSpeechRecognition) {
+      displayToast("Voice recognition not supported. Use Chrome/Edge or type below.");
+      setSpeechError("Voice recognition isn't supported in this browser. Use Chrome or Edge, or type your win below.");
+      return;
+    }
+
     setSpeechError("");
     triggerHaptic(30);
     if (
@@ -526,41 +576,38 @@ export default function App() {
     setIsRecording(true);
     setTranscriptionStatus("listening");
 
-    if (browserSupportsSpeechRecognition) {
-      resetTranscript();
-      try {
-        await SpeechRecognition.startListening({
-          continuous: true,
-          interimResults: true,
-          language: selectedLanguage,
-        });
-      } catch (e) {
-        setSpeechError("Voice recognition failed to start.");
-        setIsRecording(false);
-        return;
-      }
-      if (window.MediaRecorder) {
-        try {
-          const stream = await navigator.mediaDevices.getUserMedia({
-            audio: true,
-          });
-          recordingStreamSourceRef.current = stream;
-          const mimeType = MediaRecorder.isTypeSupported("audio/webm")
-            ? "audio/webm"
-            : "";
-          const recorder = new MediaRecorder(
-            stream,
-            mimeType ? { mimeType } : {},
-          );
-          audioStreamRef.current = [];
-          recorder.ondataavailable = (e) => {
-            if (e.data.size > 0) audioStreamRef.current.push(e.data);
-          };
-          mediaRecorderRef.current = recorder;
-          recorder.start(100);
-        } catch (e) {}
-      }
+    resetTranscript();
+    try {
+      await SpeechRecognition.startListening({
+        continuous: true,
+        interimResults: true,
+        language: selectedLanguage,
+      });
+    } catch (e) {
+      displayToast("Voice recognition failed to start — check mic permission.");
+      setSpeechError("Voice recognition failed to start.");
+      setIsRecording(false);
       return;
+    }
+
+    // Also start MediaRecorder as an audio backup (saved alongside the win).
+    if (window.MediaRecorder) {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        recordingStreamSourceRef.current = stream;
+        const mimeType = MediaRecorder.isTypeSupported("audio/webm") ? "audio/webm" : "";
+        const recorder = new MediaRecorder(stream, mimeType ? { mimeType } : {});
+        audioStreamRef.current = [];
+        recorder.ondataavailable = (e) => {
+          if (e.data.size > 0) audioStreamRef.current.push(e.data);
+        };
+        mediaRecorderRef.current = recorder;
+        recorder.start(100);
+      } catch (e) {
+        // MediaRecorder failed (mic denied or unavailable) — speech recognition
+        // may still work; this only affects the audio backup, not the transcript.
+        console.warn("MediaRecorder failed:", e);
+      }
     }
   };
 

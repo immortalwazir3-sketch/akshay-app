@@ -1,26 +1,17 @@
 export const TAGS = ["Work", "Health", "Money", "Love", "Mind", "Other"];
 
 export const LANGUAGES = [
-  { code: "en-IN", label: "English (India)" },
-  { code: "en-US", label: "English (US)" },
-  { code: "en-GB", label: "English (UK)" },
+  { code: "en-US", label: "English" },
+  { code: "zh-CN", label: "Chinese" },
   { code: "hi-IN", label: "Hindi" },
-  { code: "mr-IN", label: "Marathi" },
-  { code: "bn-IN", label: "Bengali" },
-  { code: "ta-IN", label: "Tamil" },
-  { code: "te-IN", label: "Telugu" },
-  { code: "pa-IN", label: "Punjabi" },
-  { code: "ur-PK", label: "Urdu" },
   { code: "es-ES", label: "Spanish" },
   { code: "fr-FR", label: "French" },
-  { code: "de-DE", label: "German" },
-  { code: "pt-BR", label: "Portuguese (BR)" },
   { code: "ar-SA", label: "Arabic" },
-  { code: "zh-CN", label: "Chinese (CN)" },
+  { code: "ru-RU", label: "Russian" },
+  { code: "pt-BR", label: "Portuguese" },
+  { code: "de-DE", label: "German" },
   { code: "ja-JP", label: "Japanese" },
   { code: "ko-KR", label: "Korean" },
-  { code: "ru-RU", label: "Russian" },
-  { code: "it-IT", label: "Italian" },
 ];
 
 export const TEM = {

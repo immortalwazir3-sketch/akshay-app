@@ -9,6 +9,8 @@ export default function Stack({ t, wins, onViewWin }) {
   const bsceneRef = useRef(null);
   const drumAngle = useRef(0);
   const stackRafRef = useRef(null);
+  const autoSpinRafRef = useRef(null);
+  const isAutoSpinning = useRef(false);
   const dragStateRef = useRef({ active: false, startX: 0, startAngle: 0 });
   const spinStateRef = useRef("idle");
   const [spinState, setSpinState] = React.useState("idle");
@@ -76,8 +78,27 @@ export default function Stack({ t, wins, onViewWin }) {
     pages.forEach((page, index) => page.classList.toggle("elv", index === frontIndex));
   };
 
+  const startAutoSpin = () => {
+    if (isAutoSpinning.current) return;
+    isAutoSpinning.current = true;
+    const loop = () => {
+      if (!isAutoSpinning.current) return;
+      drumAngle.current += 0.28;
+      if (drumRef.current) drumRef.current.style.transform = `rotateY(${drumAngle.current}deg)`;
+      updateFrontCard();
+      autoSpinRafRef.current = requestAnimationFrame(loop);
+    };
+    autoSpinRafRef.current = requestAnimationFrame(loop);
+  };
+
+  const stopAutoSpin = () => {
+    isAutoSpinning.current = false;
+    if (autoSpinRafRef.current) { cancelAnimationFrame(autoSpinRafRef.current); autoSpinRafRef.current = null; }
+  };
+
   const triggerSpin = () => {
     if (!wins.length || spinStateRef.current === "spinning") return;
+    stopAutoSpin();
     const sorted = [...wins].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 20);
     const randomIndex = Math.floor(Math.random() * sorted.length);
     const targetWin = sorted[randomIndex];
@@ -113,6 +134,7 @@ export default function Stack({ t, wins, onViewWin }) {
           onViewWin(targetWin.id, "stack");
           spinStateRef.current = "idle";
           setSpinState("idle");
+          startAutoSpin();
         }, 600);
       }
     };
@@ -122,6 +144,7 @@ export default function Stack({ t, wins, onViewWin }) {
 
   const handlePointerDown = (clientX) => {
     if (spinStateRef.current === "spinning") return;
+    stopAutoSpin();
     if (stackRafRef.current) { cancelAnimationFrame(stackRafRef.current); stackRafRef.current = null; }
     dragStateRef.current = { active: true, startX: clientX, startAngle: drumAngle.current };
   };
@@ -133,18 +156,25 @@ export default function Stack({ t, wins, onViewWin }) {
     updateFrontCard();
   };
 
-  const handlePointerUp = () => { dragStateRef.current.active = false; };
+  const handlePointerUp = () => {
+    if (!dragStateRef.current.active) return;
+    dragStateRef.current.active = false;
+    startAutoSpin();
+  };
 
   useEffect(() => {
     buildCylinder(wins);
     spinStateRef.current = "idle";
     setSpinState("idle");
+    startAutoSpin();
     const onResize = () => buildCylinder(wins);
     window.addEventListener("resize", onResize);
     return () => {
       window.removeEventListener("resize", onResize);
+      stopAutoSpin();
       if (stackRafRef.current) { cancelAnimationFrame(stackRafRef.current); stackRafRef.current = null; }
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [wins]);
 
   return (

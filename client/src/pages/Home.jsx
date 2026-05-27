@@ -344,7 +344,7 @@ export default function Home({
         />
       )}
 
-      {(isRecording || liveText || transcriptionStatus === "transcribing") && (
+      {(isRecording || liveText) && (
         <VStack
           align="stretch"
           bg={
@@ -371,11 +371,7 @@ export default function Home({
             color={accentBase}
             fontWeight="bold"
           >
-            {isRecording
-              ? lookupString("recording")
-              : transcriptionStatus === "transcribing"
-                ? lookupString("transcribing")
-                : "Tap to edit if needed ✦"}
+            {isRecording ? lookupString("recording") : "Tap to edit if needed ✦"}
           </Text>
 
           {isRecording && window.MediaRecorder && (
@@ -394,26 +390,6 @@ export default function Home({
             </HStack>
           )}
 
-          {transcriptionStatus === "transcribing" && (
-            <HStack
-              spacing={3}
-              py={2}
-              fontSize="sm"
-              color={textSecondary}
-              fontWeight="light"
-            >
-              <Box
-                w="14px"
-                h="14px"
-                border={`2px solid ${accentBase}`}
-                borderTopColor="transparent"
-                borderRadius="full"
-                animation="spin 1s linear infinite"
-              />
-              <Text>Transcribing with AI…</Text>
-            </HStack>
-          )}
-
           {!isEditableMode ? (
             <Text
               fontSize="lg"
@@ -421,9 +397,6 @@ export default function Home({
               fontWeight="light"
               fontStyle="italic"
               lineHeight="relaxed"
-              display={
-                transcriptionStatus === "transcribing" ? "none" : "block"
-              }
             >
               {liveText ? (
                 liveText

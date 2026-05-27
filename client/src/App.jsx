@@ -10,7 +10,6 @@ import {
 } from "@chakra-ui/react";
 import {
   TAGS,
-  LANGUAGES,
   getAnimationStyles,
   getStackStyles,
 } from "./constants";
@@ -307,11 +306,9 @@ export default function App() {
   // ─── Refs ────────────────────────────────────────────────────────────────────
   const audioPlayerRef = useRef(null);
   const savedAudioRef = useRef(null);
-  const audioContextRef = useRef(null);
   const mediaRecorderRef = useRef(null);
   const audioStreamRef = useRef([]);
   const recordingStreamSourceRef = useRef(null);
-  const speechFallbackTimerRef = useRef(null);
   const nativeCanvasRef = useRef(null);
 
   const {
@@ -320,8 +317,7 @@ export default function App() {
     resetTranscript,
     browserSupportsSpeechRecognition,
   } = useSpeechRecognition();
-  const hasVoiceSupport =
-    browserSupportsSpeechRecognition || !!window.MediaRecorder;
+  const hasVoiceSupport = browserSupportsSpeechRecognition;
   const chakraToast = useToast();
 
   // ─── Persistence effects ────────────────────────────────────────────────────
@@ -367,13 +363,20 @@ export default function App() {
 
   useEffect(() => {
     if (browserSupportsSpeechRecognition) {
-      setLiveText(transcript);
-      if (!listening && transcript.trim()) {
+      // Only mirror transcript → liveText while the user hasn't entered edit mode.
+      // Without this guard, late-arriving transcript events (common with
+      // continuous:true) overwrite whatever the user already typed/edited.
+      if (!isEditableMode) {
+        setLiveText(transcript);
+      }
+      if (!listening && transcript.trim() && !isEditableMode) {
+        setLiveText(transcript); // lock in the final transcript
         setIsEditableMode(true);
         setTranscriptionStatus("idle");
       }
     }
-  }, [transcript, listening, browserSupportsSpeechRecognition]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [transcript, listening, browserSupportsSpeechRecognition, isEditableMode]);
 
   useEffect(() => {
     if (meta.onboarded) {
@@ -559,37 +562,10 @@ export default function App() {
       }
       return;
     }
-
-    if (window.MediaRecorder) {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({
-          audio: true,
-        });
-        recordingStreamSourceRef.current = stream;
-        const mimeType = MediaRecorder.isTypeSupported("audio/webm")
-          ? "audio/webm"
-          : "";
-        const recorder = new MediaRecorder(
-          stream,
-          mimeType ? { mimeType } : {},
-        );
-        audioStreamRef.current = [];
-        recorder.ondataavailable = (e) => {
-          if (e.data.size > 0) audioStreamRef.current.push(e.data);
-        };
-        mediaRecorderRef.current = recorder;
-        recorder.start(100);
-      } catch (e) {
-        setIsRecording(false);
-        setSpeechError("Microphone access denied.");
-      }
-    }
   };
 
   const stopRecording = () => {
     setIsRecording(false);
-    if (speechFallbackTimerRef.current)
-      clearTimeout(speechFallbackTimerRef.current);
     triggerHaptic(20);
 
     if (browserSupportsSpeechRecognition) {
@@ -618,105 +594,17 @@ export default function App() {
         };
         mediaRecorderRef.current.stop();
       }
-      if (liveText.trim()) setIsEditableMode(true);
-      setTranscriptionStatus("idle");
-      return;
-    }
-
-    if (
-      mediaRecorderRef.current &&
-      mediaRecorderRef.current.state !== "inactive"
-    ) {
-      setTranscriptionStatus("transcribing");
-      mediaRecorderRef.current.onstop = async () => {
-        if (recordingStreamSourceRef.current) {
-          recordingStreamSourceRef.current.getTracks().forEach((t) => t.stop());
-          recordingStreamSourceRef.current = null;
-        }
-        await transcribeAudio();
-      };
-      mediaRecorderRef.current.stop();
-    } else {
-      if (liveText.trim()) setIsEditableMode(true);
-      setTranscriptionStatus("idle");
-    }
-  };
-
-  const transcribeAudio = async () => {
-    if (!audioStreamRef.current.length) {
-      setTranscriptionStatus("idle");
-      setSpeechError("No audio captured — hold button while speaking");
-      return;
-    }
-    const activeMime =
-      mediaRecorderRef.current?.mimeType ||
-      audioStreamRef.current[0]?.type ||
-      "audio/webm";
-    const ext =
-      activeMime.includes("mp4") || activeMime.includes("m4a")
-        ? "m4a"
-        : activeMime.includes("ogg")
-          ? "ogg"
-          : "webm";
-    const blob = new Blob(audioStreamRef.current, { type: activeMime });
-    savedAudioRef.current = { blob, mime: activeMime };
-    if (blob.size < 2000) {
-      setTranscriptionStatus("idle");
-      setSpeechError("Recording too short — speak for at least 1 second");
-      audioStreamRef.current = [];
-      return;
-    }
-    try {
-      const b64 = await new Promise((resolve, reject) => {
-        const fr = new FileReader();
-        fr.onload = () => resolve(fr.result.split(",")[1]);
-        fr.onerror = reject;
-        fr.readAsDataURL(blob);
-      });
-      displayToast(`Sending ${Math.round(blob.size / 1024)}kb to server…`);
-      const res = await fetch(apiUrl("/api/transcribe"), {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...(user?.token ? { Authorization: `Bearer ${user.token}` } : {}),
-        },
-        body: JSON.stringify({
-          audio: b64,
-          mimeType: activeMime,
-          ext,
-          language: selectedLanguage,
-          prompt: `Personal wins journal. Victories and achievements. Transcribe in language: ${LANGUAGES.find((l) => l.code === selectedLanguage)?.label || selectedLanguage}.`,
-        }),
-      });
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(
-          res.status === 401
-            ? "Invalid API key — check server setup"
-            : res.status === 413
-              ? "Recording too long — try a shorter clip"
-              : err.error?.message || `Server error ${res.status}`,
-        );
-      }
-      const data = await res.json();
-      const text = (data.text || "").trim();
-      setTranscriptionStatus("idle");
-      if (text) {
-        setLiveText(text);
+      // Prefer the live transcript value; fall back to whatever is already in liveText.
+      // This avoids reading a stale liveText closure if the final transcript word
+      // hasn't been synced to state yet.
+      const finalText = transcript.trim() || liveText.trim();
+      if (finalText) {
+        setLiveText(finalText);
         setIsEditableMode(true);
-      } else {
-        setSpeechError("Nothing detected — speak clearly and try again");
       }
-    } catch (err) {
       setTranscriptionStatus("idle");
-      const msg =
-        err.message === "Failed to fetch"
-          ? "Cannot reach server — check internet connection"
-          : err.message;
-      setSpeechError(msg);
-      displayToast("Transcription error: " + msg);
+      return;
     }
-    audioStreamRef.current = [];
   };
 
   const clearInput = () => {
@@ -724,8 +612,6 @@ export default function App() {
     setTextInputBox("");
     setIsRecording(false);
     setSelectedTag(null);
-    if (speechFallbackTimerRef.current)
-      clearTimeout(speechFallbackTimerRef.current);
     setSpeechError("");
     if (
       mediaRecorderRef.current &&
@@ -747,7 +633,12 @@ export default function App() {
     setShowCustomTagInput(false);
     setCustomTagInput("");
     try {
-      if (browserSupportsSpeechRecognition) SpeechRecognition.stopListening();
+      if (browserSupportsSpeechRecognition) {
+        // abortListening() stops immediately without firing a final result event,
+        // so the useEffect won't re-populate liveText from the old transcript.
+        SpeechRecognition.abortListening();
+        resetTranscript(); // clear the accumulated transcript state
+      }
     } catch (e) {}
   };
 
